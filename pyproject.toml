@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "intern"
+version = "0.1.0"
+description = "my_app"
+authors = ["Ser-D <ipc.avanti@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+black = "^24.4.2"
+isort = "^5.13.2"
+flake8 = "^7.1.0"
+pre-commit = "^3.7.1"
+click = "^8.1.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
