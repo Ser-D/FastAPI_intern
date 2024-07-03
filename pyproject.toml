@@ -3,6 +3,7 @@ name = "intern"
 version = "0.1.0"
 description = "my_app"
 authors = ["Ser-D <ipc.avanti@gmail.com>"]
+package-mode = false
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -25,3 +26,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 88
+
+[tool.flake8]
+max-line-length = 88
