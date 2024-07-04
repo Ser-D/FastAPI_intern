@@ -1,19 +1,14 @@
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
-from sqlalchemy import text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.config import logger, settings
 from app.db.database import get_database
 from app.db.redis import redis_client
-
-# Налаштування логування
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -50,7 +45,7 @@ def health_check():
 @app.get("/healthchecker")
 async def healthchecker(db: AsyncSession = Depends(get_database)):
     try:
-        result = await db.execute(text("SELECT 1"))
+        result = await db.execute(select(1))
         result = result.fetchone()
         if result is None:
             raise HTTPException(

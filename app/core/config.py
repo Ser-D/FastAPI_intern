@@ -1,3 +1,5 @@
+import logging
+
 from pydantic_settings import BaseSettings
 
 
@@ -11,3 +13,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Налаштування логування
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
