@@ -29,5 +29,26 @@ To run all pre-commit hooks on all files, execute the following command:
     ```bash
     docker run --env-file .env -p 8000:8000 my-fastapi-app
 
-## View
+## Running the application with Docker Compose
+
+To run the application with Docker Compose, execute the following commands:
+
+### Build and start the containers:    
+    ```bash
+    docker-compose up --build
+
+### Stop the containers:
+    ```bash
+    docker-compose down
+
+## View the applicationView
+After starting the application, you can view it in your browser at:
     http://localhost:8000
+
+## Health Check
+You can check the health of the application and its database connections by accessing the following endpoints:
+
+Application health check: http://localhost:8000/
+
+Database connection health check: http://localhost:8000/healthchecker
+    
