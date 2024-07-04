@@ -1,11 +1,8 @@
-import os
-
 import uvicorn
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-load_dotenv()
+from .core.config import settings
 
 app = FastAPI()
 
@@ -25,5 +22,4 @@ def health_check():
 
 if __name__ == "__main__":
     # uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(app, host="localhost", port=port)
+    uvicorn.run(app, host="localhost", port=settings.port)
