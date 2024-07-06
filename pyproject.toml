@@ -16,6 +16,8 @@ sqlalchemy = {extras = ["asyncio"], version = "^2.0.31"}
 asyncpg = "^0.29.0"
 fastapi-limiter = "^0.1.6"
 redis = "^5.0.7"
+alembic = "^1.13.2"
+aioredis = "^2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

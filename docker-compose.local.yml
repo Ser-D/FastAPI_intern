@@ -1,0 +1,54 @@
+version: '3.9'
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+
+#version: '3.9'
+#
+#services:
+#  web:
+#    build: .
+#    command: uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --reload
+#    ports:
+#      - "${PORT}:${PORT}"
+#    depends_on:
+#      - postgres
+#      - redis
+#    environment:
+#      - DATABASE_URL=${DATABASE_URL}
+#      - REDIS_URL=${REDIS_URL}
+#      - PORT=${PORT}
+#    env_file:
+#      - .env
+#
+#  postgres:
+#    image: postgres:16
+#    environment:
+#      POSTGRES_DB: ${POSTGRES_DB}
+#      POSTGRES_USER: ${POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+#    ports:
+#      - "5432:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#
+#  redis:
+#    image: redis:alpine
+#    ports:
+#      - "${REDIS_PORT}:${REDIS_PORT}"
+#
+#volumes:
+#  postgres_data:

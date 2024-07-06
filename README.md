@@ -6,6 +6,7 @@ To run the application, execute the following commands:
 
     ```bash
     poetry run uvicorn app.main:app --reload
+    ENV=local poetry run uvicorn app.main:app --reload
 
 ## Running tests
 
@@ -36,6 +37,8 @@ To run the application with Docker Compose, execute the following commands:
 ### Build and start the containers:    
     ```bash
     docker-compose up --build
+    docker-compose up -d
+    docker-compose -f docker-compose.local.yml up -d
 
 ### Stop the containers:
     ```bash
@@ -51,4 +54,11 @@ You can check the health of the application and its database connections by acce
 Application health check: http://localhost:8000/
 
 Database connection health check: http://localhost:8000/healthchecker
-    
+
+
+alembic revision --autogenerate -m "Initial migration"
+alembic upgrade head
+
+docker-compose -f docker-compose.local.yml up -d
+
+redis.exceptions.ConnectionError: Error 8 connecting to redis:6379. 8.

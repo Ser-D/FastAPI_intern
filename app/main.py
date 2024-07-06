@@ -7,8 +7,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import logger, settings
-from app.db.database import get_database
+from app.db.postgres import get_database
 from app.db.redis import redis_client
+
+logger.info("-----------------------")
+logger.error(f"Redis host: {redis_client.connection_pool.connection_kwargs['host']}")
 
 
 @asynccontextmanager
@@ -57,7 +60,34 @@ async def healthchecker(db: AsyncSession = Depends(get_database)):
         raise HTTPException(status_code=500, detail="Error connecting to the database")
 
 
+@app.get("/test_redis")
+async def test_redis_connection():
+    try:
+        # Перевірка підключення до Redis
+        await redis_client.ping()
+        print("Successfully connected to Redis")
+
+        # Збереження значення у Redis
+        await redis_client.set("test_key", "test_value")
+        print("Successfully set key in Redis")
+
+        # Отримання значення з Redis
+        value = await redis_client.get("test_key")
+        print(f"Value for 'test_key': {value}")
+
+        # Перевірка значення
+        assert value == "test_value", "Value did not match expected result"
+
+        # Видалення ключа
+        await redis_client.delete("test_key")
+        print("Successfully deleted key from Redis")
+
+    except Exception as e:
+        print(f"Error during Redis test: {e}")
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=settings.port)
+    # Запуск сервера FastAPI
+    uvicorn.run(app, host="0.0.0.0", port=settings.PORT)
