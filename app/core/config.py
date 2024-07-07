@@ -1,12 +1,11 @@
 import logging
-import os
 
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    REDIS_URL: str = "redis://localhost:6379"
+    REDIS_URL: str
     PORT: int = 8000
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
@@ -22,9 +21,10 @@ class Settings(BaseSettings):
 
 
 # Визначаємо, який .env файл використовувати
-env_file = ".env.local" if os.getenv("ENV") == "local" else ".env"
-
-settings = Settings(_env_file=env_file)
+# env_file = ".env.nonlocal" if os.getenv("ENV") == ".env.nonlocal" else ".env"
+#
+# settings = Settings(_env_file=env_file)
+settings = Settings()
 
 # Налаштування логування
 logging.basicConfig(level=logging.INFO)

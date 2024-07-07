@@ -1,18 +1,17 @@
-import redis.asyncio as redis
+import logging
+
+from redis.asyncio import from_url
 
 from app.core.config import settings
 
-REDIS_URL = settings.REDIS_URL or "redis://localhost:6379"
-# REDIS_URL = (settings.REDIS_URL or "redis://localhost:6379")
+logger = logging.getLogger(__name__)
 
-# Create a Redis client
-# redis_client = redis.Redis(
-#         host=settings.REDIS_DOMAIN,
-#         port=settings.REDIS_PORT,
-#         db=0,
-#     )
+HELP = f"redis://{settings.REDIS_HOST}:6379"
 
+redis_client = from_url(HELP, encoding="utf-8", decode_responses=True)
 
-redis_client = redis.from_url(
-    (REDIS_URL or "localhost"), encoding="utf-8", decode_responses=True
+logger.error(
+    f"Redis host redis_client: {redis_client.connection_pool.connection_kwargs['host']}"
 )
+logger.error(f"Redis host: {settings.REDIS_HOST}")
+logger.error(f"Redis host: {settings.REDIS_URL}")

@@ -10,9 +10,6 @@ from app.core.config import logger, settings
 from app.db.postgres import get_database
 from app.db.redis import redis_client
 
-logger.info("-----------------------")
-logger.error(f"Redis host: {redis_client.connection_pool.connection_kwargs['host']}")
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -81,6 +78,8 @@ async def test_redis_connection():
         # Видалення ключа
         await redis_client.delete("test_key")
         print("Successfully deleted key from Redis")
+
+        return value
 
     except Exception as e:
         print(f"Error during Redis test: {e}")

@@ -1,42 +1,60 @@
+import re
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 
-# 1. User schema
-class UserBase(BaseModel):
+class User(BaseModel):
+    id: int
     username: str
     email: EmailStr
-    info: Optional[str] = None
-
-
-class UserDetailResponse(UserBase):
-    id: int
-    created_at: datetime
-    updated_at: datetime
+    role: str
 
     class Config:
         orm_mode = True
 
 
-# 2. SignIn Request model
-class UserSignIn(BaseModel):
+class SignInRequest(BaseModel):
+    email: str
+    password: str
+
+
+class SignUpRequest(BaseModel):
+    username: str
     email: EmailStr
     password: str
 
+    @field_validator("email")
+    def email_cheacker(cls, value_email):
+        if re.search(r"[\w.-]+@[\w.-]+", value_email):
+            return value_email
+        raise ValueError("Invalid email")
 
-# 3. SignUp Request model
-class UserSignUp(UserBase):
-    password: str
 
-
-# 4. UserUpdate Request model
-class UserUpdate(UserBase):
+class UserUpdateRequest(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
     password: Optional[str] = None
 
+    @field_validator("email")
+    def email_cheacker(cls, value_email):
+        if re.search(r"[\w.-]+@[\w.-]+", value_email):
+            return value_email
+        raise ValueError("Invalid email")
 
-# 5. UsersList Response
+
 class UsersListResponse(BaseModel):
-    users: List[UserDetailResponse]
-    total: int
+    users: List[User]
+
+    class Config:
+        orm_mode = True
+
+
+class UserDetailResponse(BaseModel):
+    user: User
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
