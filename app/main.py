@@ -1,19 +1,14 @@
-import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
-from sqlalchemy import text
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
-from app.db.database import get_database
+from app.core.config import logger, settings
+from app.db.postgres import get_database
 from app.db.redis import redis_client
-
-# Налаштування логування
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -50,7 +45,7 @@ def health_check():
 @app.get("/healthchecker")
 async def healthchecker(db: AsyncSession = Depends(get_database)):
     try:
-        result = await db.execute(text("SELECT 1"))
+        result = await db.execute(select(1))
         result = result.fetchone()
         if result is None:
             raise HTTPException(
@@ -62,7 +57,36 @@ async def healthchecker(db: AsyncSession = Depends(get_database)):
         raise HTTPException(status_code=500, detail="Error connecting to the database")
 
 
+@app.get("/test_redis")
+async def test_redis_connection():
+    try:
+        # Перевірка підключення до Redis
+        await redis_client.ping()
+        print("Successfully connected to Redis")
+
+        # Збереження значення у Redis
+        await redis_client.set("test_key", "test_value")
+        print("Successfully set key in Redis")
+
+        # Отримання значення з Redis
+        value = await redis_client.get("test_key")
+        print(f"Value for 'test_key': {value}")
+
+        # Перевірка значення
+        assert value == "test_value", "Value did not match expected result"
+
+        # Видалення ключа
+        await redis_client.delete("test_key")
+        print("Successfully deleted key from Redis")
+
+        return value
+
+    except Exception as e:
+        print(f"Error during Redis test: {e}")
+
+
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=settings.port)
+    # Запуск сервера FastAPI
+    uvicorn.run(app, host="0.0.0.0", port=settings.PORT)
