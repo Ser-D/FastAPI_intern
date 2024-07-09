@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Integer, String, func
@@ -49,7 +50,7 @@ class User(Base):
         return result.scalar_one_or_none()
 
     @classmethod
-    async def get_all(cls, db: AsyncSession, skip: int, limit: int) -> list:
+    async def get_all(cls, db: AsyncSession, skip: int, limit: int) -> Sequence["User"]:
         result = await db.execute(select(cls).offset(skip).limit(limit))
         return result.scalars().all()
 

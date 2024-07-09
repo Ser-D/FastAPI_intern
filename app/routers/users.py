@@ -8,23 +8,16 @@ from app.models.users import User
 from app.schemas.users import SignUpRequest, UserSchema, UserUpdateRequest
 from app.services.auth import Auth
 
-router = APIRouter()
+router = APIRouter(prefix="/User", tags=["user"])
 
 
 @router.post("/signup", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def signup(body: SignUpRequest, db: AsyncSession = Depends(get_database)):
-    body.password1 = Auth.get_password_hash(body.password1)
+    data = body.model_dump()
+    data["hashed_password"] = Auth.get_password_hash(data.pop("password1"))
+    data.pop("password2", None)
     try:
-        new_user = await User.create(
-            db,
-            email=body.email,
-            firstname=body.firstname,
-            lastname=body.lastname,
-            city=body.city,
-            phone=body.phone,
-            avatar=body.avatar,
-            hashed_password=body.password1,
-        )
+        new_user = await User.create(db, **data)
         return new_user
     except IntegrityError as e:
         if "duplicate" in str(e.orig):
