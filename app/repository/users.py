@@ -1,5 +1,3 @@
-from typing import List
-
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -39,7 +37,7 @@ async def get_user_by_id(user_id: int, db: AsyncSession):
     return user
 
 
-async def get_users(skip: int, limit: int, db: AsyncSession) -> List[User]:
+async def get_users(skip: int, limit: int, db: AsyncSession) -> list[User]:
     stmt = select(User).offset(skip).limit(limit)
     result = await db.execute(stmt)
     users = result.scalars().all()

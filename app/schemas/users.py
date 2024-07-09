@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 from typing import List, Optional
 
@@ -37,13 +36,6 @@ class SignUpRequest(BaseModel):
             raise ValueError("Passwords do not match")
         return value
 
-    @field_validator("email")
-    def email_checker(cls, value_email):
-        if re.search(r"[\w.-]+@[\w.-]+", value_email):
-            return value_email
-        logger.error("Invalid email format")
-        raise ValueError("Invalid email")
-
 
 class SignInRequest(BaseModel):
     email: str
@@ -73,10 +65,3 @@ class UserUpdateRequest(BaseModel):
     city: Optional[str] = None
     phone: Optional[str] = None
     avatar: Optional[str] = None
-
-    @field_validator("email")
-    def email_checker(cls, value_email):
-        if re.search(r"[\w.-]+@[\w.-]+", value_email):
-            return value_email
-        logger.error("Invalid email format")
-        raise ValueError("Invalid email")
