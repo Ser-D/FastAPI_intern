@@ -14,6 +14,11 @@ Running the application image through Docker
     docker-compose -f docker-compose.nonlocal.yml up --build
 
 
+# Tests
+
+    ```bash
+    poetry run pytest --cov=app --disable-warnings
+
 ------------------------------------------------------------
 # FastAPI_intern
 
@@ -91,7 +96,10 @@ Configuration of env.py and alembic.ini
     alembic upgrade head
 
 
+# Tests
 
+    ```bash
+    poetry run pytest --cov=app --disable-warnings
 -----------------------
 docker-compose -f docker-compose.local.yml up -d
 

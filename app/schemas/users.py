@@ -1,18 +1,40 @@
-import re
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+from pydantic_core.core_schema import ValidationInfo
+
+from app.core.config import logger
 
 
-class User(BaseModel):
+class UserSchema(BaseModel):
     id: int
-    username: str
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
     email: EmailStr
-    role: str
+    city: Optional[str] = None
+    phone: Optional[str] = None
+    avatar: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class SignUpRequest(BaseModel):
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    email: EmailStr
+    password1: Optional[str] = "123456"
+    password2: Optional[str] = "123456"
+    city: Optional[str] = None
+    phone: Optional[str] = None
+    avatar: Optional[str] = None
+
+    @field_validator("password2")
+    def passwords_match(cls, value: str, values: ValidationInfo) -> str:
+        if "password1" in values.data and value != values.data["password1"]:
+            logger.error("Passwords do not match")
+            raise ValueError("Passwords do not match")
+        return value
 
 
 class SignInRequest(BaseModel):
@@ -20,41 +42,26 @@ class SignInRequest(BaseModel):
     password: str
 
 
-class SignUpRequest(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-
-    @field_validator("email")
-    def email_cheacker(cls, value_email):
-        if re.search(r"[\w.-]+@[\w.-]+", value_email):
-            return value_email
-        raise ValueError("Invalid email")
-
-
-class UserUpdateRequest(BaseModel):
-    username: Optional[str] = None
-    email: Optional[EmailStr] = None
-    password: Optional[str] = None
-
-    @field_validator("email")
-    def email_cheacker(cls, value_email):
-        if re.search(r"[\w.-]+@[\w.-]+", value_email):
-            return value_email
-        raise ValueError("Invalid email")
-
-
 class UsersListResponse(BaseModel):
-    users: List[User]
+    users: List[UserSchema]
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class UserDetailResponse(BaseModel):
-    user: User
+    user: UserSchema
+    is_active: Optional[bool]
+    is_superuser: Optional[bool]
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+
+class UserUpdateRequest(BaseModel):
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    email: Optional[EmailStr] = None
+    city: Optional[str] = None
+    phone: Optional[str] = None
+    avatar: Optional[str] = None

@@ -1,5 +1,6 @@
 import logging
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
@@ -16,8 +17,9 @@ class Settings(BaseSettings):
     REDIS_HOST: str
     REDIS_PORT: str
 
-    class Config:
-        env_file = ".env"
+    model_config = ConfigDict(
+        extra="ignore", env_file=".env", env_file_encoding="utf-8"
+    )
 
 
 # Визначаємо, який .env файл використовувати
