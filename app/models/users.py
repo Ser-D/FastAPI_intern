@@ -30,9 +30,10 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=func.now(), onupdate=func.now(), nullable=False
     )
+    refresh_token: Mapped[str] = mapped_column(String(255), nullable=True)
 
     @classmethod
-    async def get_user_by_email(cls, db: AsyncSession, email: str):
+    async def get_user_by_email(cls, db: AsyncSession(), email: str):
         result = await db.execute(select(cls).filter_by(email=email))
         return result.scalar_one_or_none()
 
@@ -69,3 +70,8 @@ class User(Base):
         await db.delete(user)
         await db.commit()
         return user
+
+    @classmethod
+    async def update_token(cls, token: str | None, db: AsyncSession):
+        cls.refresh_token = token
+        await db.commit()

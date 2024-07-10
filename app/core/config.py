@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, Union
 
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
@@ -16,6 +17,9 @@ class Settings(BaseSettings):
     REDIS_DOMAIN: str
     REDIS_HOST: str
     REDIS_PORT: str
+    REDIS_PASSWORD: Optional[Union[str, None]] = None
+    SECRET_KEY_JWT: str
+    ALGORITHM: str
 
     model_config = ConfigDict(
         extra="ignore", env_file=".env", env_file_encoding="utf-8"
