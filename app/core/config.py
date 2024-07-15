@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: Optional[Union[str, None]] = None
     SECRET_KEY_JWT: str
     ALGORITHM: str
+    AUTH0_DOMAIN: str
+    AUTH0_CLIENT_ID: str
+    AUTH0_CLIENT_SECRET: str
+    AUTH0_AUDIENCE: str
 
     model_config = ConfigDict(
         extra="ignore", env_file=".env", env_file_encoding="utf-8"

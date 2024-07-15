@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import messages
+from app.core.config import logger
 from app.db.postgres import get_database
 from app.models.users import User
 from app.schemas.users import (
@@ -106,3 +107,21 @@ async def logout(
     await db.commit()
 
     return {"result": "Logout success"}
+
+
+@router.get("/auth/auth0-protected", response_model=TokenSchema)
+async def auth0_protected_route(
+    auth_data: dict = Depends(auth_service.get_current_user_auth0),
+):
+    user = auth_data["user"]
+    access_token = auth_data["access_token"]
+    refresh_token = auth_data["refresh_token"]
+    token_type = auth_data["token_type"]
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": token_type,
+        "email": user.email,
+        "status": "access granted",
+    }

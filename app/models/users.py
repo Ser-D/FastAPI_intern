@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from app.core.config import logger
+
 
 class Base(DeclarativeBase):
     pass
@@ -33,7 +35,7 @@ class User(Base):
     refresh_token: Mapped[str] = mapped_column(String(255), nullable=True)
 
     @classmethod
-    async def get_user_by_email(cls, db: AsyncSession(), email: str):
+    async def get_user_by_email(cls, db: AsyncSession, email: str):
         result = await db.execute(select(cls).filter_by(email=email))
         return result.scalar_one_or_none()
 

@@ -25,6 +25,7 @@ pydantic-extra-types = "^2.9.0"
 phonenumbers = "^8.13.40"
 fastapi-pagination = "^0.12.26"
 python-jose = "^3.3.0"
+requests = "^2.32.3"
 
 
 [tool.poetry.group.dev.dependencies]
