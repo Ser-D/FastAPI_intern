@@ -20,9 +20,9 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: Optional[Union[str, None]] = None
     SECRET_KEY_JWT: str
     ALGORITHM: str
-    AUTH0_DOMAIN: str
-    AUTH0_CLIENT_ID: str
-    AUTH0_CLIENT_SECRET: str
+    ALGORITHM_AUTH0: str
+    AUDIENCE: str
+    ISSUER: str
     AUTH0_AUDIENCE: str
 
     model_config = ConfigDict(

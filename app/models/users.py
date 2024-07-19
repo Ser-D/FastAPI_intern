@@ -6,8 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from app.core.config import logger
-
 
 class Base(DeclarativeBase):
     pass
@@ -32,7 +30,7 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=func.now(), onupdate=func.now(), nullable=False
     )
-    refresh_token: Mapped[str] = mapped_column(String(255), nullable=True)
+    refresh_token: Mapped[str] = mapped_column(String(), nullable=True)
 
     @classmethod
     async def get_user_by_email(cls, db: AsyncSession, email: str):
