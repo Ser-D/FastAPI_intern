@@ -5,3 +5,4 @@ __pycache__/
 .env.nonlocal
 postgres-data/
 htmlcov
+.coverage
