@@ -12,6 +12,7 @@ from app.schemas.users import (
     TokenSchema,
     UserDetailResponse,
     UserSchema,
+    SignInRequest,
 )
 from app.services.auth import auth_service
 
@@ -29,29 +30,21 @@ async def signup(body: SignUpRequest, db: AsyncSession = Depends(get_database)):
     data = body.model_dump()
     data["hashed_password"] = auth_service.get_password_hash(data.pop("password1"))
     data.pop("password2", None)
-    try:
-        new_user = await User.create(db, **data)
-        return new_user
-    except IntegrityError as e:
-        if "duplicate" in str(e.orig):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT, detail="Account already exists"
-            )
-        raise e
+    new_user = await auth_service.create_user(db, **data)
+    return new_user
 
 
 @router.post("/login", response_model=TokenSchema)
 async def login(
-    email: str,
-    password: str,
+    body: SignInRequest,
     db: AsyncSession = Depends(get_database),
 ):
-    user = await User.get_user_by_email(db, email)
+    user = await User.get_user_by_email(db, body.email)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
-    if not auth_service.verify_password(password, user.hashed_password):
+    if not auth_service.verify_password(body.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
         )
@@ -59,11 +52,7 @@ async def login(
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
     await User.update_token(refresh_token, db)
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
+    return TokenSchema(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
 @router.get("/refresh_token", response_model=TokenSchema)
