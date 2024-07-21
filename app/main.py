@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import logger, settings
 from app.db.postgres import get_database
 from app.db.redis import redis_client
+from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
 
 
@@ -37,6 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(users_router)
 
 

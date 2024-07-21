@@ -49,7 +49,13 @@ class UsersListResponse(BaseModel):
 
 
 class UserDetailResponse(BaseModel):
-    user: UserSchema
+    id: int
+    firstname: Optional[str] = None
+    lastname: Optional[str] = None
+    email: EmailStr
+    city: Optional[str] = None
+    phone: Optional[str] = None
+    avatar: Optional[str] = None
     is_active: Optional[bool]
     is_superuser: Optional[bool]
     created_at: datetime
@@ -65,3 +71,17 @@ class UserUpdateRequest(BaseModel):
     city: Optional[str] = None
     phone: Optional[str] = None
     avatar: Optional[str] = None
+
+
+class TokenSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class LogoutResponse(BaseModel):
+    result: str
+
+
+class RequestEmail(BaseModel):
+    email: str

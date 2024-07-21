@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, Integer, String, func
@@ -29,6 +30,7 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=func.now(), onupdate=func.now(), nullable=False
     )
+    refresh_token: Mapped[str] = mapped_column(String(), nullable=True)
 
     @classmethod
     async def get_user_by_email(cls, db: AsyncSession, email: str):
@@ -49,7 +51,7 @@ class User(Base):
         return result.scalar_one_or_none()
 
     @classmethod
-    async def get_all(cls, db: AsyncSession, skip: int, limit: int) -> list:
+    async def get_all(cls, db: AsyncSession, skip: int, limit: int) -> Sequence["User"]:
         result = await db.execute(select(cls).offset(skip).limit(limit))
         return result.scalars().all()
 
@@ -68,3 +70,8 @@ class User(Base):
         await db.delete(user)
         await db.commit()
         return user
+
+    @classmethod
+    async def update_token(cls, token: str | None, db: AsyncSession):
+        cls.refresh_token = token
+        await db.commit()
