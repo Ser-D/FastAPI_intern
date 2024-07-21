@@ -9,6 +9,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import logger, settings
@@ -36,6 +37,17 @@ class Auth:
 
     def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
+
+    async def create_user(self, db: AsyncSession, **data):
+        try:
+            new_user = await User.create(db, **data)
+            return new_user
+        except IntegrityError as e:
+            if "duplicate" in str(e.orig):
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT, detail="Account already exists"
+                )
+            raise e
 
     async def create_access_token(
         self, data: dict, expires_delta: Optional[float] = None
