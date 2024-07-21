@@ -49,6 +49,18 @@ class Auth:
                 )
             raise e
 
+    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> User:
+        user = await User.get_user_by_email(db, email)
+        if user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+            )
+        if not self.verify_password(password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+            )
+        return user
+
     async def create_access_token(
         self, data: dict, expires_delta: Optional[float] = None
     ) -> str:

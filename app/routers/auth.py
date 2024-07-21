@@ -38,15 +38,7 @@ async def login(
     body: SignInRequest,
     db: AsyncSession = Depends(get_database),
 ):
-    user = await User.get_user_by_email(db, body.email)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-        )
-    if not auth_service.verify_password(body.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-        )
+    user = await auth_service.authenticate_user(db, body.email, body.password)
 
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
