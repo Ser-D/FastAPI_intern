@@ -67,10 +67,15 @@ class UserDetailResponse(BaseModel):
 class UserUpdateRequest(BaseModel):
     firstname: Optional[str] = None
     lastname: Optional[str] = None
-    email: Optional[EmailStr] = None
-    city: Optional[str] = None
-    phone: Optional[str] = None
-    avatar: Optional[str] = None
+    password1: Optional[str] = "123456"
+    password2: Optional[str] = "123456"
+
+    @field_validator("password2")
+    def passwords_match(cls, value: str, values: ValidationInfo) -> str:
+        if "password1" in values.data and value != values.data["password1"]:
+            logger.error("Passwords do not match")
+            raise ValueError("Passwords do not match")
+        return value
 
 
 class TokenSchema(BaseModel):

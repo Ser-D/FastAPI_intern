@@ -39,6 +39,15 @@ async def update_user(
     db: AsyncSession = Depends(get_database),
     user=Depends(auth_service.get_current_user),
 ):
+    if user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only update your own profile",
+        )
+
+    data = body.model_dump()
+    data["hashed_password"] = auth_service.get_password_hash(data.pop("password1"))
+    data.pop("password2", None)
     user = await User.update(db, user_id, **body.dict(exclude_unset=True))
     if not user:
         raise HTTPException(
@@ -53,6 +62,11 @@ async def delete_user(
     db: AsyncSession = Depends(get_database),
     user=Depends(auth_service.get_current_user),
 ):
+    if user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You can only delete your own profile",
+        )
     user = await User.delete(db, user_id)
     if not user:
         raise HTTPException(
