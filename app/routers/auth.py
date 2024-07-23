@@ -43,7 +43,7 @@ async def login(
 
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
-    await User.update_token(user.id, refresh_token, db)
+    await User.update_token(user.id, refresh_token, db) 
     return TokenSchema(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
