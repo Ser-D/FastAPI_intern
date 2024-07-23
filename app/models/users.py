@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from app.models.company import Company
+
 
 class Base(DeclarativeBase):
     pass
@@ -79,5 +81,3 @@ class User(Base):
         user = await cls.get_by_id(db, user_id)
         user.refresh_token = token
         await db.commit()
-
-from app.models.company import Company
