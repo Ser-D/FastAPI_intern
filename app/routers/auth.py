@@ -12,7 +12,7 @@ from app.schemas.users import (
     TokenSchema,
     UserDetailResponse,
     UserSchema,
-    SignInRequest,
+    SignInRequest
 )
 from app.services.auth import auth_service
 
