@@ -45,6 +45,9 @@ async def update_user(
             detail="You can only update your own profile",
         )
 
+    data = body.model_dump()
+    data["hashed_password"] = auth_service.get_password_hash(data.pop("password1"))
+    data.pop("password2", None)
     user = await User.update(db, user_id, **body.dict(exclude_unset=True))
     if not user:
         raise HTTPException(
