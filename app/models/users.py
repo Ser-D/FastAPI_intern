@@ -4,13 +4,9 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.company import Company
-
-
-class Base(DeclarativeBase):
-    pass
+from app.models.base import Base
 
 
 class User(Base):

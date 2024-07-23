@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.users import Base, User
+from app.models.base import Base
 
 
 class Company(Base):
