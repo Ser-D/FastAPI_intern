@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.users import Base
+from app.models.users import Base, User
 
 
 class Company(Base):
@@ -72,8 +72,3 @@ class Company(Base):
         await db.delete(company)
         await db.commit()
         return company
-
-
-from app.models.users import User
-
-Company.owner = relationship("User", back_populates="companies", collection_class=list)

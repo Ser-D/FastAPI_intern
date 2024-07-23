@@ -31,6 +31,9 @@ class User(Base):
         DateTime, default=func.now(), onupdate=func.now(), nullable=False
     )
     refresh_token: Mapped[str] = mapped_column(String(), nullable=True)
+    companies: Mapped[Sequence["Company"]] = relationship(
+        "Company", back_populates="owner", collection_class=list
+    )
 
     @classmethod
     async def get_user_by_email(cls, db: AsyncSession, email: str):
@@ -77,8 +80,4 @@ class User(Base):
         user.refresh_token = token
         await db.commit()
 
-
-    companies: Mapped[Sequence["Company"]] = relationship(
-        "Company", back_populates="owner", collection_class=list
-    )
 from app.models.company import Company
