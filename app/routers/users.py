@@ -48,7 +48,7 @@ async def update_user(
     data = body.model_dump()
     data["hashed_password"] = auth_service.get_password_hash(data.pop("password1"))
     data.pop("password2", None)
-    user = await User.update(db, user_id, **body.dict(exclude_unset=True))
+    user = await User.update(db, user_id, **data)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
