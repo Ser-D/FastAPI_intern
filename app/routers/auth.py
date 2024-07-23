@@ -11,7 +11,8 @@ from app.schemas.users import (
     SignUpRequest,
     TokenSchema,
     UserDetailResponse,
-    UserSchema, SignInRequest,
+    UserSchema,
+    SignInRequest
 )
 from app.services.auth import auth_service
 
