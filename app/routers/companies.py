@@ -70,7 +70,7 @@ async def update_company(
     company_in: CompanyUpdate,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
-    company = await Company.update(db=db, company_id=company_id, **company_in.dict())
+    company = await Company.update(db=db, company_id=company_id, user=current_user.id, **company_in.dict())
     return company
 
 
@@ -81,5 +81,5 @@ async def delete_company(
     company_id: int,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
-    company = await Company.delete(db=db, company_id=company_id)
+    company = await Company.delete(db=db, company_id=company_id, user=current_user.id)
     return company

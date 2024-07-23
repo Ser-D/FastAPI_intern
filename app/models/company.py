@@ -36,6 +36,11 @@ class Company(Base):
         return result.scalar_one_or_none()
 
     @classmethod
+    async def get_my_company(cls, db: AsyncSession, company_id: int, owner_id: int) -> "Company":
+        result = await db.execute(select(cls).filter_by(id=company_id, owner_id=owner_id))
+        return result.scalar_one_or_none()
+
+    @classmethod
     async def get_all(
         cls, db: AsyncSession, skip: int, limit: int
     ) -> Sequence["Company"]:
@@ -61,8 +66,8 @@ class Company(Base):
         return company
 
     @classmethod
-    async def update(cls, db: AsyncSession, company_id: int, **kwargs) -> "Company":
-        company = await cls.get_visible_by_id(db, company_id)
+    async def update(cls, db: AsyncSession, company_id: int, user: int, **kwargs) -> "Company":
+        company = await cls.get_my_company(db, company_id, user)
         if not company:
             raise HTTPException(status_code=404, detail="Company not found")
         for key, value in kwargs.items():
@@ -72,8 +77,8 @@ class Company(Base):
         return company
 
     @classmethod
-    async def delete(cls, db: AsyncSession, company_id: int) -> "Company":
-        company = await cls.get_visible_by_id(db, company_id)
+    async def delete(cls, db: AsyncSession, company_id: int, user: int) -> "Company":
+        company = await cls.get_my_company(db, company_id, user)
         if not company:
             raise HTTPException(status_code=404, detail="Company not found")
         await db.delete(company)
