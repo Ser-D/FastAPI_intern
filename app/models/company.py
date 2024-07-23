@@ -54,8 +54,15 @@ class Company(Base):
         return result.scalars().all()
 
     @classmethod
-    async def update(cls, db: AsyncSession, company_id: int, **kwargs) -> "Company":
+    async def get_visible_by_id(cls, db: AsyncSession, company_id: int) -> "Company":
         company = await cls.get_by_id(db, company_id)
+        if company is None or not company.is_visible:
+            return None
+        return company
+
+    @classmethod
+    async def update(cls, db: AsyncSession, company_id: int, **kwargs) -> "Company":
+        company = await cls.get_visible_by_id(db, company_id)
         if not company:
             raise HTTPException(status_code=404, detail="Company not found")
         for key, value in kwargs.items():
@@ -66,7 +73,7 @@ class Company(Base):
 
     @classmethod
     async def delete(cls, db: AsyncSession, company_id: int) -> "Company":
-        company = await cls.get_by_id(db, company_id)
+        company = await cls.get_visible_by_id(db, company_id)
         if not company:
             raise HTTPException(status_code=404, detail="Company not found")
         await db.delete(company)

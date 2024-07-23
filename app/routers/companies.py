@@ -70,11 +70,6 @@ async def update_company(
     company_in: CompanyUpdate,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
-    company = await Company.get_by_id(db=db, company_id=company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-    if company.owner_id != current_user.id:
-        raise HTTPException(status_code=400, detail="Not enough permissions")
     company = await Company.update(db=db, company_id=company_id, **company_in.dict())
     return company
 
@@ -86,10 +81,5 @@ async def delete_company(
     company_id: int,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
-    company = await Company.get_by_id(db=db, company_id=company_id)
-    if not company:
-        raise HTTPException(status_code=404, detail="Company not found")
-    if company.owner_id != current_user.id:
-        raise HTTPException(status_code=400, detail="Not enough permissions")
     company = await Company.delete(db=db, company_id=company_id)
     return company
