@@ -1,12 +1,14 @@
 from collections.abc import Sequence
+from typing import List
 
 from fastapi import HTTPException
-from sqlalchemy import Boolean, ForeignKey, Integer, String
+from sqlalchemy import Boolean, ForeignKey, Integer, String, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.models.members import Member
 
 
 class Company(Base):
@@ -20,6 +22,9 @@ class Company(Base):
 
     owner: Mapped["User"] = relationship(
         "User", back_populates="companies", collection_class=list
+    )
+    members: Mapped[List["Member"]] = relationship(
+        "Member", back_populates="company", cascade="all, delete-orphan"
     )
 
     @classmethod
@@ -77,10 +82,11 @@ class Company(Base):
         return company
 
     @classmethod
-    async def delete(cls, db: AsyncSession, company_id: int, user: int) -> "Company":
-        company = await cls.get_my_company(db, company_id, user)
+    async def delete(cls, db: AsyncSession, company_id: int, user_id: int) -> "Company":
+        company = await cls.get_my_company(db, company_id, user_id)
         if not company:
             raise HTTPException(status_code=404, detail="Company not found")
+
         await db.delete(company)
         await db.commit()
         return company
