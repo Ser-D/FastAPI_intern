@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_database
 from app.models.users import User
+from app.repository.members import member_repository
+from app.schemas.members import MemberCreate, MemberDetail
 from app.schemas.users import UserSchema, UserUpdateRequest
 from app.services.auth import auth_service
-from app.schemas.members import MemberDetail, MemberCreate
-from app.repository.members import member_repository
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -25,7 +25,7 @@ async def invite_user(
     user_id: int,
     company_id: int,
     db: AsyncSession = Depends(get_database),
-    current_user: User = Depends(auth_service.get_current_user)
+    current_user: User = Depends(auth_service.get_current_user),
 ):
     await member_repository.user_exists(db, user_id)
     await member_repository.is_owner(db, current_user.id, company_id)
@@ -35,20 +35,22 @@ async def invite_user(
         user_id=user_id,
         is_admin=False,
         status="pending",
-        type="invite"
+        type="invite",
     )
     return await member_repository.create_member(db, member_create)
 
 
 @router.post("/{user_id}/accept_request", response_model=MemberDetail)
 async def accept_request(
-        user_id: int,
-        company_id: int,
-        db: AsyncSession = Depends(get_database),
-        current_user: User = Depends(auth_service.get_current_user)
+    user_id: int,
+    company_id: int,
+    db: AsyncSession = Depends(get_database),
+    current_user: User = Depends(auth_service.get_current_user),
 ):
     await member_repository.is_owner(db, current_user.id, company_id)
-    accepted_member = await member_repository.accept_membership_request(db, user_id, company_id)
+    accepted_member = await member_repository.accept_membership_request(
+        db, user_id, company_id
+    )
     return accepted_member
 
 
@@ -57,7 +59,7 @@ async def remove_user(
     user_id: int,
     company_id: int,
     db: AsyncSession = Depends(get_database),
-    current_user: User = Depends(auth_service.get_current_user)
+    current_user: User = Depends(auth_service.get_current_user),
 ):
     await member_repository.is_owner(db, current_user.id, company_id)
 

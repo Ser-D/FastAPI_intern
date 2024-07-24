@@ -41,8 +41,12 @@ class Company(Base):
         return result.scalar_one_or_none()
 
     @classmethod
-    async def get_my_company(cls, db: AsyncSession, company_id: int, owner_id: int) -> "Company":
-        result = await db.execute(select(cls).filter_by(id=company_id, owner_id=owner_id))
+    async def get_my_company(
+        cls, db: AsyncSession, company_id: int, owner_id: int
+    ) -> "Company":
+        result = await db.execute(
+            select(cls).filter_by(id=company_id, owner_id=owner_id)
+        )
         return result.scalar_one_or_none()
 
     @classmethod
@@ -71,7 +75,9 @@ class Company(Base):
         return company
 
     @classmethod
-    async def update(cls, db: AsyncSession, company_id: int, user: int, **kwargs) -> "Company":
+    async def update(
+        cls, db: AsyncSession, company_id: int, user: int, **kwargs
+    ) -> "Company":
         company = await cls.get_my_company(db, company_id, user)
         if not company:
             raise HTTPException(status_code=404, detail="Company not found")

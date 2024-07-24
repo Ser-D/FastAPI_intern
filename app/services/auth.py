@@ -45,11 +45,14 @@ class Auth:
         except IntegrityError as e:
             if "duplicate" in str(e.orig):
                 raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT, detail="Account already exists"
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Account already exists",
                 )
             raise e
 
-    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> User:
+    async def authenticate_user(
+        self, db: AsyncSession, email: str, password: str
+    ) -> User:
         user = await User.get_user_by_email(db, email)
         if user is None:
             raise HTTPException(
