@@ -180,5 +180,33 @@ class MemberRepository:
         result = await db.execute(query)
         return result.scalars().all()
 
+    async def assign_admin(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
+        member = await self.get_member(db, user_id, company_id)
+        if not member:
+            raise HTTPException(status_code=404, detail="Member not found")
+        if member.is_admin:
+            raise HTTPException(status_code=400, detail="Member is already an admin")
+        member.is_admin = True
+        await db.commit()
+        await db.refresh(member)
+        return member
+
+    async def remove_admin(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
+        member = await self.get_member(db, user_id, company_id)
+        if not member:
+            raise HTTPException(status_code=404, detail="Member not found")
+        if not member.is_admin:
+            raise HTTPException(status_code=400, detail="Member is not an admin")
+        member.is_admin = False
+        await db.commit()
+        await db.refresh(member)
+        return member
+
+    async def get_admins(self, db: AsyncSession, company_id: int) -> list[Member]:
+        result = await db.execute(
+            select(Member).filter_by(company_id=company_id, is_admin=True)
+        )
+        return result.scalars().all()
+
 
 member_repository = MemberRepository()
