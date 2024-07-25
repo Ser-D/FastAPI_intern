@@ -72,66 +72,6 @@ async def membership_all_companies(
     return memberships
 
 
-@router.get("/memberships/company/{company_id}", response_model=list[MemberDetail])
-async def membership_company(
-    company_id: int,
-    db: AsyncSession = Depends(get_database),
-    current_user: User = Depends(auth_service.get_current_user),
-    type: str = Query(None, description="Type of membership: invite or request"),
-    status: str = Query(None, description="Status of membership: active or pending"),
-):
-    await member_repository.is_owner(db, current_user.id, company_id)
-    memberships = await member_repository.get_memberships_company(
-        db, current_user.id, company_id, type, status
-    )
-    return memberships
-
-
-@router.post("/{company_id}/join", response_model=MemberDetail)
-async def join_company(
-    company_id: int,
-    db: AsyncSession = Depends(get_database),
-    current_user: User = Depends(auth_service.get_current_user),
-):
-    await member_repository.company_exists(db, company_id)
-    await member_repository.member_exists(db, current_user.id, company_id)
-
-    member_create = MemberCreate(
-        company_id=company_id,
-        user_id=current_user.id,
-        is_admin=False,
-        status="pending",
-        type="request",
-    )
-    return await member_repository.create_member(db, member_create)
-
-
-@router.post("/{company_id}/accept-invite", response_model=MemberDetail)
-async def accept_invite(
-    company_id: int,
-    db: AsyncSession = Depends(get_database),
-    current_user: User = Depends(auth_service.get_current_user),
-):
-    accepted_member = await member_repository.accept_invite(
-        db, current_user.id, company_id
-    )
-    return accepted_member
-
-
-@router.post("/{company_id}/leave", response_model=MemberDetail)
-async def leave_company(
-    company_id: int,
-    db: AsyncSession = Depends(get_database),
-    current_user: User = Depends(auth_service.get_current_user),
-):
-    member = await member_repository.get_member(db, current_user.id, company_id)
-
-    deleted_member = await member_repository.delete_member(
-        db, current_user.id, company_id
-    )
-    return deleted_member
-
-
 @router.get("/{company_id}", response_model=CompanyDetail)
 async def read_company(
     *,
@@ -153,8 +93,9 @@ async def update_company(
     company_in: CompanyUpdate,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
+    company_data = company_in.model_dump()
     company = await Company.update(
-        db=db, company_id=company_id, user=current_user.id, **company_in.dict()
+        db=db, company_id=company_id, user=current_user.id, **company_data
     )
     return company
 

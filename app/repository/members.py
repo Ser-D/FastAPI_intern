@@ -12,7 +12,8 @@ from app.schemas.members import MemberCreate
 
 class MemberRepository:
     async def create_member(self, db: AsyncSession, member: MemberCreate) -> Member:
-        member = Member(**member.dict())
+        member_data = member.model_dump()
+        member = Member(**member_data)
         db.add(member)
         await db.commit()
         await db.refresh(member)
@@ -153,10 +154,10 @@ class MemberRepository:
         await db.refresh(member)
         return member
 
-    async def get_memberships_all_companies(
-        self, db: AsyncSession, user_id: int, type: str = None, status: str = None
+    async def get_memberships_my_company(
+        self, db: AsyncSession, user_id: int, company_id: int, type: str = None, status: str = None
     ) -> list[Member]:
-        query = select(Member).filter(Member.user_id == user_id)
+        query = select(Member).filter(Member.company_id == company_id)
         if type:
             query = query.filter(Member.type == type)
         if status:

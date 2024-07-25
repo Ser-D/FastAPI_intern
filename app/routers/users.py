@@ -40,21 +40,7 @@ async def invite_user(
     return await member_repository.create_member(db, member_create)
 
 
-@router.post("/{user_id}/accept_request", response_model=MemberDetail)
-async def accept_request(
-    user_id: int,
-    company_id: int,
-    db: AsyncSession = Depends(get_database),
-    current_user: User = Depends(auth_service.get_current_user),
-):
-    await member_repository.is_owner(db, current_user.id, company_id)
-    accepted_member = await member_repository.accept_membership_request(
-        db, user_id, company_id
-    )
-    return accepted_member
-
-
-@router.post("/{user_id}/remove/{company_id}", response_model=MemberDetail)
+@router.post("/{user_id}/remove", response_model=MemberDetail)
 async def remove_user(
     user_id: int,
     company_id: int,
