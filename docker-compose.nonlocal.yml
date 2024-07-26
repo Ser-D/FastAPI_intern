@@ -11,6 +11,8 @@ services:
       - DATABASE_URL_1=${DATABASE_URL}
       - REDIS_URL_1=${REDIS_URL}
       - PORT=${PORT}
+    volumes:
+      - .:/app
     env_file:
       - .env.nonlocal
 

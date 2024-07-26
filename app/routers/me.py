@@ -36,7 +36,7 @@ async def get_my_invites(
     )
 
 
-@router.post("/invites/{member_id}", response_model=MemberDetail)
+@router.post("/invites/{company_id}", response_model=MemberDetail)
 async def accept_invite(
     company_id: int,
     db: AsyncSession = Depends(get_database),
@@ -48,7 +48,7 @@ async def accept_invite(
     return accepted_member
 
 
-@router.post("/join", response_model=MemberDetail)
+@router.post("/join/{company_id}", response_model=MemberDetail)
 async def join_company(
     company_id: int,
     db: AsyncSession = Depends(get_database),
@@ -67,7 +67,7 @@ async def join_company(
     return await member_repository.create_member(db, member_create)
 
 
-@router.post("/leave", response_model=MemberDetail)
+@router.post("/leave/{company_id}", response_model=MemberDetail)
 async def leave_company(
     company_id: int,
     db: AsyncSession = Depends(get_database),
