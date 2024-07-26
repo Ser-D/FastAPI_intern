@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_database
 from app.models.users import User
 from app.repository.members import member_repository
-from app.schemas.members import MemberDetail, MemberCreate
+from app.schemas.members import MemberCreate, MemberDetail
 from app.schemas.users import UserDetailResponse
 from app.services.auth import auth_service
 
