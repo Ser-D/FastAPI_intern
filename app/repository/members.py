@@ -155,7 +155,12 @@ class MemberRepository:
         return member
 
     async def get_memberships_my_company(
-        self, db: AsyncSession, user_id: int, company_id: int, type: str = None, status: str = None
+        self,
+        db: AsyncSession,
+        user_id: int,
+        company_id: int,
+        type: str = None,
+        status: str = None,
     ) -> list[Member]:
         query = select(Member).filter(Member.company_id == company_id)
         if type:

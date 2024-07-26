@@ -1,16 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Security, status, Query
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.exc import IntegrityError
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core import messages
 from app.db.postgres import get_database
 from app.models.users import User
 from app.repository.members import member_repository
-from app.schemas.members import MemberDetail, MemberCreate
+from app.schemas.members import MemberCreate, MemberDetail
 from app.services.auth import auth_service
 
 router = APIRouter(prefix="/companies/{company_id}/members", tags=["members"])
+
 
 @router.get("/view", response_model=list[MemberDetail])
 async def membership_company(
@@ -40,6 +38,7 @@ async def accept_request(
     )
     return accepted_member
 
+
 @router.post("/join", response_model=MemberDetail)
 async def join_company(
     company_id: int,
@@ -59,14 +58,13 @@ async def join_company(
     return await member_repository.create_member(db, member_create)
 
 
-
 @router.post("/leave", response_model=MemberDetail)
 async def leave_company(
     company_id: int,
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    member = await member_repository.get_member(db, current_user.id, company_id)
+    await member_repository.get_member(db, current_user.id, company_id)
 
     deleted_member = await member_repository.delete_member(
         db, current_user.id, company_id

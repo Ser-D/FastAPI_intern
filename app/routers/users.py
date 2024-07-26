@@ -49,7 +49,7 @@ async def remove_user(
 ):
     await member_repository.is_owner(db, current_user.id, company_id)
 
-    member = await member_repository.get_member(db, user_id, company_id)
+    await member_repository.get_member(db, user_id, company_id)
 
     deleted_member = await member_repository.delete_member(db, user_id, company_id)
     return deleted_member

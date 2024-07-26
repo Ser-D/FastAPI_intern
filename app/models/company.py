@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import List
 
 from fastapi import HTTPException
-from sqlalchemy import Boolean, ForeignKey, Integer, String, delete
+from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
