@@ -85,7 +85,6 @@ class UserUpdateRequest(BaseModel):
         return value
 
 
-
 class TokenSchema(BaseModel):
     access_token: str
     refresh_token: str

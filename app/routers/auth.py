@@ -1,19 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import messages
 from app.db.postgres import get_database
 from app.models.users import User
-from app.repository.members import member_repository
-from app.schemas.members import MemberDetail
 from app.schemas.users import (
     LogoutResponse,
     SignInRequest,
     SignUpRequest,
     TokenSchema,
-    UserDetailResponse,
     UserSchema,
 )
 from app.services.auth import auth_service
@@ -31,8 +27,8 @@ async def signup(body: SignUpRequest, db: AsyncSession = Depends(get_database)):
 
 @router.post("/login", response_model=TokenSchema)
 async def login(
-        body: SignInRequest,
-        db: AsyncSession = Depends(get_database),
+    body: SignInRequest,
+    db: AsyncSession = Depends(get_database),
 ):
     user = await auth_service.authenticate_user(db, body.email, body.password)
 
@@ -46,8 +42,8 @@ async def login(
 
 @router.get("/refresh_token", response_model=TokenSchema)
 async def refresh_token(
-        credentials: HTTPAuthorizationCredentials = Security(get_refresh_token),
-        db: AsyncSession = Depends(get_database),
+    credentials: HTTPAuthorizationCredentials = Security(get_refresh_token),
+    db: AsyncSession = Depends(get_database),
 ):
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
@@ -74,8 +70,8 @@ async def refresh_token(
     "/logout", response_model=LogoutResponse, status_code=status.HTTP_202_ACCEPTED
 )
 async def logout(
-        user=Depends(auth_service.get_current_user),
-        db=Depends(get_database),
+    user=Depends(auth_service.get_current_user),
+    db=Depends(get_database),
 ):
     user.refresh_token = None
     await db.commit()

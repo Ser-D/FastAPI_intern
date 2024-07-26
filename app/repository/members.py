@@ -155,7 +155,12 @@ class MemberRepository:
         return member
 
     async def get_memberships_my_company(
-        self, db: AsyncSession, user_id: int, company_id: int, type: str = None, status: str = None
+        self,
+        db: AsyncSession,
+        user_id: int,
+        company_id: int,
+        type: str = None,
+        status: str = None,
     ) -> list[Member]:
         query = select(Member).filter(Member.company_id == company_id)
         if type:
@@ -180,7 +185,9 @@ class MemberRepository:
         result = await db.execute(query)
         return result.scalars().all()
 
-    async def assign_admin(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
+    async def assign_admin(
+        self, db: AsyncSession, user_id: int, company_id: int
+    ) -> Member:
         member = await self.get_member(db, user_id, company_id)
         if not member:
             raise HTTPException(status_code=404, detail="Member not found")
@@ -191,7 +198,9 @@ class MemberRepository:
         await db.refresh(member)
         return member
 
-    async def remove_admin(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
+    async def remove_admin(
+        self, db: AsyncSession, user_id: int, company_id: int
+    ) -> Member:
         member = await self.get_member(db, user_id, company_id)
         if not member:
             raise HTTPException(status_code=404, detail="Member not found")
