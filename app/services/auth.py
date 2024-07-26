@@ -45,11 +45,14 @@ class Auth:
         except IntegrityError as e:
             if "duplicate" in str(e.orig):
                 raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT, detail="Account already exists"
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Account already exists",
                 )
             raise e
 
-    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> User:
+    async def authenticate_user(
+        self, db: AsyncSession, email: str, password: str
+    ) -> User:
         user = await User.get_user_by_email(db, email)
         if user is None:
             raise HTTPException(
@@ -68,7 +71,7 @@ class Auth:
         if expires_delta:
             expire = datetime.utcnow() + timedelta(seconds=expires_delta)
         else:
-            expire = datetime.utcnow() + timedelta(minutes=15)
+            expire = datetime.utcnow() + timedelta(minutes=30)
         to_encode.update(
             {"iat": datetime.utcnow(), "exp": expire, "scope": "access_token"}
         )

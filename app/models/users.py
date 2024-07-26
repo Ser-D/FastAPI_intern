@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 from datetime import datetime
+from typing import List
 
 from sqlalchemy import Boolean, DateTime, Integer, String, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,8 +30,11 @@ class User(Base):
         DateTime, default=func.now(), onupdate=func.now(), nullable=False
     )
     refresh_token: Mapped[str] = mapped_column(String(), nullable=True)
-    companies: Mapped[Sequence["Company"]] = relationship(
-        "Company", back_populates="owner", collection_class=list
+    companies: Mapped[List["Company"]] = relationship(
+        "Company", back_populates="owner", cascade="all, delete-orphan"
+    )
+    members: Mapped[List["Member"]] = relationship(
+        "Member", back_populates="user", cascade="all, delete-orphan"
     )
 
     @classmethod

@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 from pydantic_core.core_schema import ValidationInfo
 
 from app.core.config import logger
+from app.services.auth import auth_service
 
 
 class UserSchema(BaseModel):
@@ -35,6 +36,12 @@ class SignUpRequest(BaseModel):
             logger.error("Passwords do not match")
             raise ValueError("Passwords do not match")
         return value
+
+    def model_dump(self, *args, **kwargs):
+        data = super().model_dump(*args, **kwargs)
+        data["hashed_password"] = auth_service.get_password_hash(data.pop("password1"))
+        data.pop("password2", None)
+        return data
 
 
 class SignInRequest(BaseModel):

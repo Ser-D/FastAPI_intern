@@ -1,15 +1,17 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_database
 from app.models.company import Company
 from app.models.users import User
+from app.repository.members import member_repository
 from app.schemas.companies import CompanyCreate, CompanyDetail, CompanyUpdate
+from app.schemas.members import MemberCreate, MemberDetail
 from app.services.auth import auth_service
 
-router = APIRouter(prefix="/company", tags=["company"])
+router = APIRouter(prefix="/companies", tags=["companies"])
 
 
 @router.post("/", response_model=CompanyDetail)
@@ -22,6 +24,14 @@ async def create_company(
     company = await Company.create_with_owner(
         db=db, **company_in.dict(), owner_id=current_user.id
     )
+    member_create = MemberCreate(
+        company_id=company.id,
+        user_id=current_user.id,
+        is_admin=True,
+        status="active",
+        type="auto",
+    )
+    await member_repository.create_member(db, member_create)
     return company
 
 
@@ -49,6 +59,19 @@ async def get_my_companies(
     return companies
 
 
+@router.get("/memberships/all", response_model=list[MemberDetail])
+async def membership_all_companies(
+    db: AsyncSession = Depends(get_database),
+    current_user: User = Depends(auth_service.get_current_user),
+    type: str = Query(None, description="Type of membership: invite or request"),
+    status: str = Query(None, description="Status of membership: active or pending"),
+):
+    memberships = await member_repository.get_memberships_all_my_companies(
+        db, current_user.id, type, status
+    )
+    return memberships
+
+
 @router.get("/{company_id}", response_model=CompanyDetail)
 async def read_company(
     *,
@@ -70,16 +93,18 @@ async def update_company(
     company_in: CompanyUpdate,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
-    company = await Company.update(db=db, company_id=company_id, user=current_user.id, **company_in.dict())
+    company_data = company_in.model_dump()
+    company = await Company.update(
+        db=db, company_id=company_id, user=current_user.id, **company_data
+    )
     return company
 
 
-@router.delete("/{company_id}", response_model=CompanyDetail)
+@router.delete("/{company_id}", response_model=dict)
 async def delete_company(
-    *,
-    db: AsyncSession = Depends(get_database),
     company_id: int,
+    db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
-) -> CompanyDetail:
-    company = await Company.delete(db=db, company_id=company_id, user=current_user.id)
-    return company
+):
+    await Company.delete(db, company_id, current_user.id)
+    return {"detail": "Company deleted successfully"}

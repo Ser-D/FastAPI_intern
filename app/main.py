@@ -11,6 +11,8 @@ from app.db.postgres import get_database
 from app.db.redis import redis_client
 from app.routers.auth import router as auth_router
 from app.routers.companies import router as companies_router
+from app.routers.me import router as me_router
+from app.routers.members import router as members_router
 from app.routers.users import router as users_router
 
 
@@ -40,8 +42,10 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(me_router)
 app.include_router(users_router)
 app.include_router(companies_router)
+app.include_router(members_router)
 
 
 @app.get("/")

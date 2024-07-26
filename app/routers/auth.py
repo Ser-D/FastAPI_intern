@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import messages
@@ -8,11 +7,10 @@ from app.db.postgres import get_database
 from app.models.users import User
 from app.schemas.users import (
     LogoutResponse,
+    SignInRequest,
     SignUpRequest,
     TokenSchema,
-    UserDetailResponse,
     UserSchema,
-    SignInRequest
 )
 from app.services.auth import auth_service
 
@@ -20,16 +18,9 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 get_refresh_token = HTTPBearer()
 
 
-@router.get("/me", response_model=UserDetailResponse)
-async def read_me(current_user: User = Depends(auth_service.get_current_user)):
-    return current_user
-
-
 @router.post("/signup", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
 async def signup(body: SignUpRequest, db: AsyncSession = Depends(get_database)):
     data = body.model_dump()
-    data["hashed_password"] = auth_service.get_password_hash(data.pop("password1"))
-    data.pop("password2", None)
     new_user = await auth_service.create_user(db, **data)
     return new_user
 
@@ -43,8 +34,10 @@ async def login(
 
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
-    await User.update_token(user.id, refresh_token, db) 
-    return TokenSchema(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+    await User.update_token(user.id, refresh_token, db)
+    return TokenSchema(
+        access_token=access_token, refresh_token=refresh_token, token_type="bearer"
+    )
 
 
 @router.get("/refresh_token", response_model=TokenSchema)
