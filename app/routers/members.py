@@ -72,3 +72,4 @@ async def remove_admin(
     await member_repository.is_owner(db, current_user.id, company_id)
     non_admin_member = await member_repository.remove_admin(db, user_id, company_id)
     return non_admin_member
+
