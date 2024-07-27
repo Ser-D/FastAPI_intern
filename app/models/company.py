@@ -26,6 +26,8 @@ class Company(Base):
     members: Mapped[List["Member"]] = relationship(
         "Member", back_populates="company", cascade="all, delete-orphan"
     )
+    questions = relationship("Question", back_populates="company")
+    quizzes = relationship("Quiz", back_populates="company")
 
     @classmethod
     async def create_with_owner(cls, db: AsyncSession, **kwargs) -> "Company":
