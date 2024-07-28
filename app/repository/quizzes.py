@@ -1,14 +1,24 @@
+import json
+from datetime import timedelta
 from typing import List
 
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.core.config import logger
+from app.db.redis import redis_client
 from app.models.members import Member
 from app.models.question import Question as QuestionModel
 from app.models.quiz import Quiz as QuizModel
 from app.repository.quizresult import repo_quizresult
-from app.schemas.quizzes import QuizCreate, QuizResult, QuizRunResponse, QuizUpdate
+from app.schemas.quizzes import (
+    QuizCreate,
+    QuizResponseRedis,
+    QuizResult,
+    QuizRunResponse,
+    QuizUpdate,
+)
 
 
 class QuizRepository:
@@ -174,7 +184,14 @@ class QuizRepository:
 
         score = (correct_answers_count / len(correct_answers_list)) * 100
 
-        # Використовуємо існуючу функцію для збереження результату квізу
+        await self.store_quiz_responses(
+            db=db,
+            user_id=user_id,
+            quiz_id=quiz_id,
+            responses=responses,
+            company_id=company_id,
+        )
+
         quiz_result = await repo_quizresult.create_quiz_result(
             db=db,
             user_id=user_id,
@@ -210,6 +227,48 @@ class QuizRepository:
             raise HTTPException(status_code=404, detail="Quiz not found")
 
         return quiz
+
+    async def store_quiz_responses(
+        self,
+        db: AsyncSession,
+        user_id: int,
+        quiz_id: int,
+        responses: List[QuizRunResponse],
+        company_id: int,
+    ):
+        key = f"quiz_responses:{user_id}:{quiz_id}"
+
+        quiz, db_questions = await self.get_quiz_with_questions(db, quiz_id)
+
+        redis_data = []
+        for question, response in zip(db_questions, responses):
+            redis_response = QuizResponseRedis(
+                selected_answers=response.selected_answers,
+                is_correct=sorted(question.correct_answers)
+                == sorted(response.selected_answers),
+            )
+            redis_data.append(
+                {
+                    "question_text": question.text,
+                    "question_answer_options": question.answer_options,
+                    "response": redis_response.dict(),
+                }
+            )
+
+        quiz_data = {
+            "quiz_id": quiz.id,
+            "title": quiz.title,
+            "description": quiz.description,
+            "company_id": quiz.company_id,
+        }
+        redis_data.append({"quiz_data": quiz_data})
+
+        json_data = json.dumps(redis_data)
+        await redis_client.setex(key, timedelta(hours=48), json_data)
+
+        logger.info(
+            f"Stored quiz responses for user {user_id}, quiz {quiz_id} in Redis."
+        )
 
 
 quiz_repository = QuizRepository()

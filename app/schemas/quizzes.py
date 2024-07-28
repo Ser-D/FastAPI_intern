@@ -50,3 +50,8 @@ class QuizResult(BaseModel):
     total_questions: int
     correct_answers: int
     score: float
+
+
+class QuizResponseRedis(BaseModel):
+    selected_answers: List[int]
+    is_correct: bool
