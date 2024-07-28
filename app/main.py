@@ -14,6 +14,7 @@ from app.routers.companies import router as companies_router
 from app.routers.me import router as me_router
 from app.routers.members import router as members_router
 from app.routers.questions import router as questions_router
+from app.routers.quizzes import router as quizzes_router
 from app.routers.users import router as users_router
 
 
@@ -48,6 +49,7 @@ app.include_router(users_router)
 app.include_router(companies_router)
 app.include_router(members_router)
 app.include_router(questions_router)
+app.include_router(quizzes_router)
 
 
 @app.get("/")

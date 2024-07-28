@@ -15,6 +15,16 @@ class QuestionUpdate(BaseModel):
     correct_answers: List[int] = Field(..., min_items=1)
 
 
+class QuestionBase(BaseModel):
+    id: int
+    text: str
+    answer_options: List[str]
+    correct_answers: List[str]
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class Question(BaseModel):
     id: int
     text: str

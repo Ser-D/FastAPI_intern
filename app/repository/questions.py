@@ -17,7 +17,7 @@ class QuestionRepository:
             select(Member).where(
                 Member.company_id == company_id,
                 Member.user_id == user_id,
-                Member.is_admin == True,
+                Member.is_admin,
             )
         )
         admin = admin_check.scalar_one_or_none()

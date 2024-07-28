@@ -10,17 +10,11 @@ class Question(Base):
     __tablename__ = "questions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    text: Mapped[str] = mapped_column(String, nullable=False)  # Текст питання
-    answer_options: Mapped[List[str]] = mapped_column(
-        ARRAY(String), nullable=False
-    )  # Перелік відповідей (від 2 до 4)
-    correct_answers: Mapped[List[str]] = mapped_column(
-        ARRAY(String), nullable=False
-    )  # Перелік правильних відповідей
+    text: Mapped[str] = mapped_column(String, nullable=False)
+    answer_options: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False)
+    correct_answers: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False)
     company_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("companies.id"), nullable=False
-    )  # ID компанії
+    )
 
-    company = relationship(
-        "Company", back_populates="questions"
-    )  # Відношення до компанії
+    company = relationship("Company", back_populates="questions")
