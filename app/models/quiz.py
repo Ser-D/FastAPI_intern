@@ -17,3 +17,4 @@ class Quiz(Base):
     )
 
     company = relationship("Company", back_populates="quizzes")
+    quiz_results = relationship("QuizResult", back_populates="quiz")

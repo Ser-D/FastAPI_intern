@@ -49,5 +49,4 @@ class QuizWithQuestions(BaseModel):
 class QuizResult(BaseModel):
     total_questions: int
     correct_answers: int
-    incorrect_answers: int
     score: float

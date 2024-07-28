@@ -9,7 +9,7 @@ from app.repository.questions import question_repository
 from app.schemas.questions import Question, QuestionCreate, QuestionUpdate
 from app.services.auth import auth_service
 
-router = APIRouter(prefix="/companies/{company_id}/questions", tags=["questions"])
+router = APIRouter(prefix="/question/{company_id}/questions", tags=["questions"])
 
 
 @router.post("/", response_model=Question)

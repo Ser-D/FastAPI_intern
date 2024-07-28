@@ -28,6 +28,7 @@ class Company(Base):
     )
     questions = relationship("Question", back_populates="company")
     quizzes = relationship("Quiz", back_populates="company")
+    quiz_results = relationship("QuizResult", back_populates="company")
 
     @classmethod
     async def create_with_owner(cls, db: AsyncSession, **kwargs) -> "Company":
