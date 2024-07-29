@@ -189,7 +189,8 @@ class QuizRepository:
             user_id=user_id,
             quiz_id=quiz_id,
             responses=responses,
-            company_id=company_id,
+            correct_answers=correct_answers_count,
+            total_questions=len(correct_answers_list),
         )
 
         quiz_result = await repo_quizresult.create_quiz_result(
@@ -234,7 +235,8 @@ class QuizRepository:
         user_id: int,
         quiz_id: int,
         responses: List[QuizRunResponse],
-        company_id: int,
+        correct_answers=int,
+        total_questions=int,
     ):
         key = f"quiz_responses:{user_id}:{quiz_id}"
 
@@ -260,6 +262,9 @@ class QuizRepository:
             "title": quiz.title,
             "description": quiz.description,
             "company_id": quiz.company_id,
+            "user_id": user_id,
+            "correct_answers": correct_answers,
+            "total_questions": total_questions,
         }
         redis_data.append({"quiz_data": quiz_data})
 
