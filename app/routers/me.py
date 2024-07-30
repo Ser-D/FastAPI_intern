@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_database
+from app.models.notifications import Notification
 from app.models.users import User
 from app.repository.members import member_repository
 from app.schemas.members import MemberCreate, MemberDetail
+from app.schemas.notifications import NotificationResponse
 from app.schemas.users import UserDetailResponse
 from app.services.auth import auth_service
 
@@ -79,3 +82,32 @@ async def leave_company(
         db, current_user.id, company_id
     )
     return deleted_member
+
+
+@router.get("/notifications", response_model=list[NotificationResponse])
+async def get_notifications(
+    db: AsyncSession = Depends(get_database),
+    current_user: User = Depends(auth_service.get_current_user),
+):
+    notifications = await db.execute(
+        select(Notification).filter(Notification.user_id == current_user.id)
+    )
+    return notifications.scalars().all()
+
+
+@router.put(
+    "/notifications/{notification_id}/read", response_model=NotificationResponse
+)
+async def mark_notification_as_read(
+    notification_id: int,
+    db: AsyncSession = Depends(get_database),
+    current_user: User = Depends(auth_service.get_current_user),
+):
+    notification = await db.get(Notification, notification_id)
+    if not notification or notification.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Notification not found")
+
+    notification.status = True
+    await db.commit()
+    await db.refresh(notification)
+    return notification

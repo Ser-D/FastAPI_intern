@@ -37,6 +37,7 @@ class User(Base):
         "Member", back_populates="user", cascade="all, delete-orphan"
     )
     quiz_results = relationship("QuizResult", back_populates="user")
+    notifications = relationship("Notification", back_populates="user")
 
     @classmethod
     async def get_user_by_email(cls, db: AsyncSession, email: str):

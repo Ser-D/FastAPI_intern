@@ -11,6 +11,7 @@ from app.db.redis import redis_client
 from app.models.members import Member
 from app.models.question import Question as QuestionModel
 from app.models.quiz import Quiz as QuizModel
+from app.repository.notifications import notification_repo
 from app.repository.quizresult import repo_quizresult
 from app.schemas.quizzes import (
     QuizCreate,
@@ -91,6 +92,11 @@ class QuizRepository:
         db.add(db_quiz)
         await db.commit()
         await db.refresh(db_quiz)
+
+        await notification_repo.create_quiz_notification(
+            db=db, company_id=company_id, quiz_id=db_quiz.id
+        )
+
         return db_quiz
 
     async def get_quizzes(
