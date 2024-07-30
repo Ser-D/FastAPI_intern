@@ -1,7 +1,7 @@
+from datetime import date, datetime
 from typing import List
 
 from pydantic import BaseModel
-from datetime import datetime, date
 
 
 class UserAverageScore(BaseModel):
