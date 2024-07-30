@@ -36,6 +36,7 @@ class User(Base):
     members: Mapped[List["Member"]] = relationship(
         "Member", back_populates="user", cascade="all, delete-orphan"
     )
+    quiz_results = relationship("QuizResult", back_populates="user")
 
     @classmethod
     async def get_user_by_email(cls, db: AsyncSession, email: str):

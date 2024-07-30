@@ -7,7 +7,7 @@ from app.repository.members import member_repository
 from app.schemas.members import MemberDetail
 from app.services.auth import auth_service
 
-router = APIRouter(prefix="/companies/{company_id}/members", tags=["members"])
+router = APIRouter(prefix="/{company_id}/members", tags=["members"])
 
 
 @router.get("/view", response_model=list[MemberDetail])

@@ -9,10 +9,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import logger, settings
 from app.db.postgres import get_database
 from app.db.redis import redis_client
+from app.routers.analytics import router as analytics_router
 from app.routers.auth import router as auth_router
 from app.routers.companies import router as companies_router
 from app.routers.me import router as me_router
 from app.routers.members import router as members_router
+from app.routers.questions import router as questions_router
+from app.routers.quizresult import router as quizresult_router
+from app.routers.quizzes import router as quizzes_router
 from app.routers.users import router as users_router
 
 
@@ -46,6 +50,10 @@ app.include_router(me_router)
 app.include_router(users_router)
 app.include_router(companies_router)
 app.include_router(members_router)
+app.include_router(questions_router)
+app.include_router(quizzes_router)
+app.include_router(quizresult_router)
+app.include_router(analytics_router)
 
 
 @app.get("/")
