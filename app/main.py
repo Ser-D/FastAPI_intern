@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
@@ -18,6 +19,12 @@ from app.routers.questions import router as questions_router
 from app.routers.quizresult import router as quizresult_router
 from app.routers.quizzes import router as quizzes_router
 from app.routers.users import router as users_router
+from app.services.scheduler import check_quiz_completions
+
+scheduler = AsyncIOScheduler()
+scheduler.start()
+
+scheduler.add_job(check_quiz_completions, "cron", hour=00, minute=1)
 
 
 @asynccontextmanager
@@ -32,6 +39,7 @@ async def lifespan(app: FastAPI):
     yield
 
     await redis_client.close()
+
     logger.info("Підключення до Redis закрито.")
 
 
@@ -79,22 +87,17 @@ async def healthchecker(db: AsyncSession = Depends(get_database)):
 @app.get("/test_redis")
 async def test_redis_connection():
     try:
-        # Перевірка підключення до Redis
         await redis_client.ping()
         print("Successfully connected to Redis")
 
-        # Збереження значення у Redis
         await redis_client.set("test_key", "test_value")
         print("Successfully set key in Redis")
 
-        # Отримання значення з Redis
         value = await redis_client.get("test_key")
         print(f"Value for 'test_key': {value}")
 
-        # Перевірка значення
         assert value == "test_value", "Value did not match expected result"
 
-        # Видалення ключа
         await redis_client.delete("test_key")
         print("Successfully deleted key from Redis")
 
@@ -107,5 +110,4 @@ async def test_redis_connection():
 if __name__ == "__main__":
     import uvicorn
 
-    # Запуск сервера FastAPI
     uvicorn.run(app, host="0.0.0.0", port=settings.PORT)
