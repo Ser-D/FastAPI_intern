@@ -1,17 +1,15 @@
 from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import logger, settings
-from app.db.postgres import get_database
 from app.db.redis import redis_client
 from app.routers.analytics import router as analytics_router
 from app.routers.auth import router as auth_router
+from app.routers.checkers import router as checkers_router
 from app.routers.companies import router as companies_router
 from app.routers.me import router as me_router
 from app.routers.members import router as members_router
@@ -62,49 +60,7 @@ app.include_router(questions_router)
 app.include_router(quizzes_router)
 app.include_router(quizresult_router)
 app.include_router(analytics_router)
-
-
-@app.get("/")
-def health_check():
-    return {"status_code": 200, "detail": "ok", "result": "working"}
-
-
-@app.get("/healthchecker")
-async def healthchecker(db: AsyncSession = Depends(get_database)):
-    try:
-        result = await db.execute(select(1))
-        result = result.fetchone()
-        if result is None:
-            raise HTTPException(
-                status_code=500, detail="Database is not configured correctly"
-            )
-        return {"message": "Welcome to FastAPI"}
-    except Exception as e:
-        logger.error(f"Error connecting to the database: {e}")
-        raise HTTPException(status_code=500, detail="Error connecting to the database")
-
-
-@app.get("/test_redis")
-async def test_redis_connection():
-    try:
-        await redis_client.ping()
-        print("Successfully connected to Redis")
-
-        await redis_client.set("test_key", "test_value")
-        print("Successfully set key in Redis")
-
-        value = await redis_client.get("test_key")
-        print(f"Value for 'test_key': {value}")
-
-        assert value == "test_value", "Value did not match expected result"
-
-        await redis_client.delete("test_key")
-        print("Successfully deleted key from Redis")
-
-        return value
-
-    except Exception as e:
-        print(f"Error during Redis test: {e}")
+app.include_router(checkers_router)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -17,10 +18,11 @@ class NotificationRepository:
             select(User).join(Member).filter(Member.company_id == company_id)
         )
         users = users.scalars().all()
+        message = f"New quiz in company {company_id}, quiz ID: {quiz_id}, created at {datetime.utcnow()}"
         for user in users:
             notification = Notification(
                 user_id=user.id,
-                message=f"New quiz in company {company_id}, quiz ID: {quiz_id}, created at {datetime.utcnow()}",
+                message=message,
             )
             db.add(notification)
         await db.commit()
@@ -36,6 +38,24 @@ class NotificationRepository:
         db.add(notification)
         await db.commit()
         logger.info(f"Notification created for user {user_id} for quiz {quiz_id}")
+
+    async def get_user_notifications(self, db: AsyncSession, user_id: int):
+        notifications = await db.execute(
+            select(Notification).filter(Notification.user_id == user_id)
+        )
+        return notifications.scalars().all()
+
+    async def mark_notification_as_read(
+        self, db: AsyncSession, notification_id: int, user_id: int
+    ):
+        notification = await db.get(Notification, notification_id)
+        if not notification or notification.user_id != user_id:
+            raise HTTPException(status_code=404, detail="Notification not found")
+
+        notification.is_read = True
+        await db.commit()
+        await db.refresh(notification)
+        return notification
 
 
 notification_repo = NotificationRepository()

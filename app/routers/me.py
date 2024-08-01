@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_database
-from app.models.notifications import Notification
 from app.models.users import User
 from app.repository.members import member_repository
+from app.repository.notifications import notification_repo
 from app.schemas.members import MemberCreate, MemberDetail
 from app.schemas.notifications import NotificationResponse
 from app.schemas.users import UserDetailResponse
@@ -89,10 +88,8 @@ async def get_notifications(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    notifications = await db.execute(
-        select(Notification).filter(Notification.user_id == current_user.id)
-    )
-    return notifications.scalars().all()
+    notifications = await notification_repo.get_user_notifications(db, current_user.id)
+    return notifications
 
 
 @router.put(
@@ -103,11 +100,7 @@ async def mark_notification_as_read(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    notification = await db.get(Notification, notification_id)
-    if not notification or notification.user_id != current_user.id:
-        raise HTTPException(status_code=404, detail="Notification not found")
-
-    notification.status = True
-    await db.commit()
-    await db.refresh(notification)
+    notification = await notification_repo.mark_notification_as_read(
+        db, notification_id, current_user.id
+    )
     return notification
