@@ -28,6 +28,8 @@ python-jose = "^3.3.0"
 requests = "^2.32.3"
 cryptography = "^42.0.8"
 apscheduler = "^3.10.4"
+pytest-asyncio = "^0.23.8"
+pytest-mock = "^3.14.0"
 
 
 [tool.poetry.group.dev.dependencies]
