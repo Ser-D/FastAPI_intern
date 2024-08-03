@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+      - main
   pull_request:
     branches:
       - develop
@@ -28,6 +29,10 @@ jobs:
         pip install poetry
         poetry install
 
+    - name: Run tests
+      run: |
+        source .venv/bin/activate
+        poetry run pytest
 
     - name: Build Docker image
       run: |
