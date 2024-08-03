@@ -54,7 +54,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: eu-north-1
+        aws-region: us-east-1
 
     - name: Ensure SSH key file exists
       run: |
@@ -63,11 +63,11 @@ jobs:
 
     - name: Test SSH connection
       run: |
-        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ec2-user@${{ secrets.AWS_EC2_HOST }} exit
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} exit
 
     - name: Deploy to AWS EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ec2-user@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
           docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
           docker stop my-fastapi-app || true
           docker rm my-fastapi-app || true
