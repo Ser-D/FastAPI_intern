@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, async_sessi
 from fastapi.testclient import TestClient
 from app.core.config import settings
 from app.models import Base, User
-from app.main import app  # Додати цей рядок
+from app.main import app
 from app.db.postgres import get_database
 from app.services.auth import auth_service
 

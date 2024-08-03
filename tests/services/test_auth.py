@@ -1,19 +1,44 @@
-# tests/services/test_member_repository.py
+# tests/services/test_auth.py
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repository.member_repository import MemberRepository
-from app.schemas.members import MemberCreate
-from app.models.members import Member
-
+from httpx import AsyncClient
+from app.services.auth import auth_service
 
 @pytest.mark.asyncio
-async def test_create_member(db_session: AsyncSession):
-    repo = MemberRepository()
-    member_data = MemberCreate(user_id=1, company_id=1, is_admin=False, status='active', type='request')
-    member = await repo.create_member(db_session, member_data)
+async def test_create_user(db_session: AsyncSession):
+    user_data = {
+        "firstname": "Test",
+        "lastname": "User",
+        "email": "test@example.com",
+        "password": "testpassword"
+    }
+    new_user = await auth_service.create_user(db_session, **user_data)
+    assert new_user.email == user_data["email"]
 
-    assert member.user_id == member_data.user_id
-    assert member.company_id == member_data.company_id
-    assert member.is_admin == member_data.is_admin
-    assert member.status == member_data.status
-    assert member.type == member_data.type
+@pytest.mark.asyncio
+async def test_authenticate_user(db_session: AsyncSession):
+    user_data = {
+        "firstname": "Test",
+        "lastname": "User",
+        "email": "test@example.com",
+        "password": "testpassword"
+    }
+    new_user = await auth_service.create_user(db_session, **user_data)
+    authenticated_user = await auth_service.authenticate_user(db_session, user_data["email"], user_data["password"])
+    assert authenticated_user.email == user_data["email"]
+
+@pytest.mark.asyncio
+async def test_create_access_token():
+    data = {"sub": "test@example.com"}
+    access_token = await auth_service.create_access_token(data)
+    assert access_token is not None
+
+@pytest.mark.asyncio
+async def test_get_current_user(async_client: AsyncClient, db_session: AsyncSession, get_token: str):
+    token = await auth_service.create_access_token({"sub": "test@example.com"})
+    headers = {"Authorization": f"Bearer {token}"}
+    response = await async_client.get("/some_protected_route", headers=headers)
+    assert response.status_code == 200
+    current_user = await auth_service.get_current_user(token, db_session)
+    assert current_user.email == "test@example.com"
