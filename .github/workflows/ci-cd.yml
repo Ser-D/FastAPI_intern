@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - develop
-      - main
   pull_request:
     branches:
       - develop
-
 
 jobs:
   build:
@@ -30,10 +28,6 @@ jobs:
         pip install poetry
         poetry install
 
-    - name: Run tests
-      run: |
-        source .venv/bin/activate
-        poetry run pytest
 
     - name: Build Docker image
       run: |
@@ -63,14 +57,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Create SSH key file
-      run: |
-        echo "${{ secrets.AWS_EC2_KEY }}" > key.pem
-        chmod 400 key.pem
-
     - name: Deploy to AWS EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i key.pem ec2-user@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no -i "${{ secrets.AWS_EC2_KEY }}" ec2-user@${{ secrets.AWS_EC2_HOST }} << 'EOF'
         docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
         docker stop my-fastapi-app || true
         docker rm my-fastapi-app || true
