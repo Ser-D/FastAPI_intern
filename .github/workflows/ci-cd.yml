@@ -76,10 +76,14 @@ jobs:
         ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} exit
 
     - name: Deploy to AWS EC2
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       run: |
         ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          echo "Pulling Docker image: $DOCKER_HUB_USERNAME/my-fastapi-app:latest"
           sudo docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
           sudo docker stop my-fastapi-app || true
           sudo docker rm my-fastapi-app || true
+          echo "Running Docker container: $DOCKER_HUB_USERNAME/my-fastapi-app:latest"
           sudo docker run -d -p 80:80 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
         EOF
