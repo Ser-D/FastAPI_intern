@@ -1,5 +1,5 @@
 import json
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List
 
 from fastapi import HTTPException
@@ -11,6 +11,7 @@ from app.db.redis import redis_client
 from app.models.members import Member
 from app.models.question import Question as QuestionModel
 from app.models.quiz import Quiz as QuizModel
+from app.models.quizresult import QuizResult as QuizResultModel
 from app.repository.notifications import notification_repo
 from app.repository.quizresult import repo_quizresult
 from app.schemas.quizzes import (
@@ -280,6 +281,19 @@ class QuizRepository:
         logger.info(
             f"Stored quiz responses for user {user_id}, quiz {quiz_id} in Redis."
         )
+
+    async def get_last_completion_time(
+        self, db: AsyncSession, user_id: int, quiz_id: int
+    ) -> datetime:
+        result = await db.execute(
+            select(QuizResultModel.completed_at)
+            .filter(
+                QuizResultModel.user_id == user_id, QuizResultModel.quiz_id == quiz_id
+            )
+            .order_by(QuizResultModel.completed_at.desc())
+        )
+        last_completion = result.scalars().first()
+        return last_completion
 
 
 quiz_repository = QuizRepository()
