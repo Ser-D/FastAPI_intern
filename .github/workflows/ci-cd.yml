@@ -61,6 +61,15 @@ jobs:
         echo "${{ secrets.AWS_EC2_KEY }}" > ec2_key.pem
         chmod 400 ec2_key.pem
 
+    - name: Install Docker on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
+        EOF
+
     - name: Test SSH connection
       run: |
         ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} exit
