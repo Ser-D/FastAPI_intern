@@ -8,7 +8,6 @@ on:
     branches:
       - develop
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,7 +27,6 @@ jobs:
         source .venv/bin/activate
         pip install poetry
         poetry install
-
 
     - name: Build Docker image
       run: |
@@ -58,11 +56,20 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
+    - name: Ensure SSH key file exists
+      run: |
+        echo "${{ secrets.AWS_EC2_KEY }}" > ec2_key.pem
+        chmod 400 ec2_key.pem
+
+    - name: Test SSH connection
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ec2-user@${{ secrets.AWS_EC2_HOST }} exit
+
     - name: Deploy to AWS EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i "${{ secrets.AWS_EC2_KEY }}" ec2-user@${{ secrets.AWS_EC2_HOST }} << 'EOF'
-        docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
-        docker stop my-fastapi-app || true
-        docker rm my-fastapi-app || true
-        docker run -d -p 80:80 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ec2-user@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+          docker stop my-fastapi-app || true
+          docker rm my-fastapi-app || true
+          docker run -d -p 80:80 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
         EOF
