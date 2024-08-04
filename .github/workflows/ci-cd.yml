@@ -75,6 +75,10 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} exit
 
+    - name: Upload .env.sample to EC2 and rename
+      run: |
+        scp -o StrictHostKeyChecking=no -i "ec2_key.pem" .env.sample ubuntu@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/.env
+
     - name: Deploy to AWS EC2
       env:
         DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -84,5 +88,5 @@ jobs:
           sudo docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
           sudo docker stop my-fastapi-app || true
           sudo docker rm my-fastapi-app || true
-          sudo docker run -d -p 80:80 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+          sudo docker run -d --env-file /home/ubuntu/.env -p 80:80 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
         EOF
