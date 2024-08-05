@@ -1,11 +1,10 @@
 from collections.abc import Sequence
-from typing import List
 
 from fastapi import HTTPException
-from sqlalchemy import Boolean, ForeignKey, Integer, String
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import relationship
 
 from app.models.base import Base
 
@@ -13,11 +12,11 @@ from app.models.base import Base
 class Company(Base):
     __tablename__ = "companies"
 
-    id = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name = mapped_column(String, index=True)
-    description = mapped_column(String, index=True)
-    owner_id = mapped_column(Integer, ForeignKey("users.id"))
-    is_visible = mapped_column(Boolean, default=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, index=True)
+    description = Column(String, index=True)
+    owner_id = Column(Integer, ForeignKey("users.id"))
+    is_visible = Column(Boolean, default=True)
 
     owner = relationship("User", back_populates="companies", collection_class=list)
     members = relationship("Member", back_populates="company", cascade="all, delete-orphan")
