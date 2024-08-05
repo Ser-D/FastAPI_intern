@@ -18,3 +18,5 @@ async def connect_to_redis():
 import asyncio
 
 asyncio.run(connect_to_redis())
+
+

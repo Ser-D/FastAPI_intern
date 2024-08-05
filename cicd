@@ -28,7 +28,6 @@ jobs:
         pip install poetry
         poetry install
 
-
     - name: Build Docker image
       run: |
         docker build -t my-fastapi-app .
@@ -57,11 +56,37 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: Deploy to AWS EC2
+    - name: Ensure SSH key file exists
       run: |
-        ssh -o StrictHostKeyChecking=no -i "${{ secrets.AWS_EC2_KEY }}" ec2-user@${{ secrets.AWS_EC2_HOST }} << 'EOF'
-        docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
-        docker stop my-fastapi-app || true
-        docker rm my-fastapi-app || true
-        docker run -d -p 80:80 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+        echo "${{ secrets.AWS_EC2_KEY }}" > ec2_key.pem
+        chmod 400 ec2_key.pem
+
+    - name: Install Docker on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
+          sudo usermod -aG docker ubuntu
+        EOF
+
+    - name: Test SSH connection
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} exit
+
+    - name: Upload .env.sample to EC2 and rename
+      run: |
+        scp -o StrictHostKeyChecking=no -i "ec2_key.pem" .env.sample ubuntu@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/.env
+
+    - name: Deploy to AWS EC2
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          export DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
+          sudo docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+          sudo docker stop my-fastapi-app || true
+          sudo docker rm my-fastapi-app || true
+          sudo docker run -d --env-file /home/ubuntu/.env -p 80:8000 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
         EOF
