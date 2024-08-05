@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from sqlalchemy import Boolean, DateTime, Integer, String, func, Column
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import relationship

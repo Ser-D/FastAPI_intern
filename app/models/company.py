@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 
 from fastapi import HTTPException
-from sqlalchemy import Boolean, ForeignKey, Integer, String, Column
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import relationship
