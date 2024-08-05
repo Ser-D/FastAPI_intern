@@ -19,7 +19,7 @@ class Company(Base):
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     is_visible: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    owner: Mapped = relationship("User", back_populates="companies", collection_class=list)
+    owner = relationship("User", back_populates="companies", collection_class=list)
     members: Mapped[List] = relationship("Member", back_populates="company", cascade="all, delete-orphan")
     questions = relationship("Question", back_populates="company")
     quizzes = relationship("Quiz", back_populates="company")
