@@ -50,50 +50,32 @@ class Auth:
                 )
             raise e
 
-    async def authenticate_user(
-        self, db: AsyncSession, email: str, password: str
-    ) -> User:
+    async def authenticate_user(self, db: AsyncSession, email: str, password: str) -> User:
         user = await User.get_user_by_email(db, email)
         if user is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
         if not self.verify_password(password, user.hashed_password):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
         return user
 
-    async def create_access_token(
-        self, data: dict, expires_delta: Optional[float] = None
-    ) -> str:
+    async def create_access_token(self, data: dict, expires_delta: Optional[float] = None) -> str:
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + timedelta(seconds=expires_delta)
         else:
             expire = datetime.utcnow() + timedelta(minutes=30)
-        to_encode.update(
-            {"iat": datetime.utcnow(), "exp": expire, "scope": "access_token"}
-        )
-        encoded_access_token = jwt.encode(
-            to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM
-        )
+        to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": "access_token"})
+        encoded_access_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_access_token
 
-    async def create_refresh_token(
-        self, data: dict, expires_delta: Optional[float] = None
-    ) -> str:
+    async def create_refresh_token(self, data: dict, expires_delta: Optional[float] = None) -> str:
         to_encode = data.copy()
         if expires_delta:
             expire = datetime.utcnow() + timedelta(seconds=expires_delta)
         else:
             expire = datetime.utcnow() + timedelta(days=7)
-        to_encode.update(
-            {"iat": datetime.utcnow(), "exp": expire, "scope": "refresh_token"}
-        )
-        encoded_refresh_token = jwt.encode(
-            to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM
-        )
+        to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": "refresh_token"})
+        encoded_refresh_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_refresh_token
 
     async def get_current_user(
@@ -112,9 +94,7 @@ class Auth:
             email = await self.check_token_auth0(token.credentials, db)
         else:
             try:
-                payload = jwt.decode(
-                    token.credentials, self.SECRET_KEY, algorithms=[self.ALGORITHM]
-                )
+                payload = jwt.decode(token.credentials, self.SECRET_KEY, algorithms=[self.ALGORITHM])
                 if payload["scope"] == "access_token":
                     email = payload["sub"]
                     if email is None:
@@ -139,9 +119,7 @@ class Auth:
 
     async def decode_refresh_token(self, refresh_token: str) -> str:
         try:
-            payload = jwt.decode(
-                refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM]
-            )
+            payload = jwt.decode(refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
             if payload["scope"] == "refresh_token":
                 email = payload["sub"]
                 return email
@@ -191,9 +169,7 @@ class Auth:
             return user.email
 
         except JWTError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-            )
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     @staticmethod
     def load_public_key_from_cert(cert_path: str):

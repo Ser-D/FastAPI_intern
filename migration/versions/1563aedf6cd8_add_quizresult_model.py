@@ -27,9 +27,7 @@ def upgrade() -> None:
         sa.Column("correct_answers", sa.Integer(), nullable=False),
         sa.Column("total_questions", sa.Integer(), nullable=False),
         sa.Column("score", sa.Float(), nullable=False),
-        sa.Column(
-            "completed_at", sa.DateTime(), server_default=sa.func.now(), nullable=False
-        ),
+        sa.Column("completed_at", sa.DateTime(), server_default=sa.func.now(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
 

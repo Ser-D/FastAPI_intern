@@ -19,12 +19,8 @@ class MemberRepository:
         await db.refresh(member)
         return member
 
-    async def get_member(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ) -> Member:
-        result = await db.execute(
-            select(Member).filter_by(user_id=user_id, company_id=company_id)
-        )
+    async def get_member(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
+        result = await db.execute(select(Member).filter_by(user_id=user_id, company_id=company_id))
         member = result.scalars().first()
         if not member:
             raise HTTPException(status_code=404, detail="Member not found")
@@ -37,9 +33,7 @@ class MemberRepository:
         return True
 
     async def is_owner(self, db: AsyncSession, user_id: int, company_id: int) -> bool:
-        result = await db.execute(
-            select(Company).filter_by(id=company_id, owner_id=user_id)
-        )
+        result = await db.execute(select(Company).filter_by(id=company_id, owner_id=user_id))
         company = result.scalars().first()
         if not company:
             raise HTTPException(
@@ -48,12 +42,8 @@ class MemberRepository:
             )
         return True
 
-    async def update_member_is_admin(
-        self, db: AsyncSession, user_id: int, company_id: int, is_admin: bool
-    ) -> Member:
-        result = await db.execute(
-            select(Member).filter_by(user_id=user_id, company_id=company_id)
-        )
+    async def update_member_is_admin(self, db: AsyncSession, user_id: int, company_id: int, is_admin: bool) -> Member:
+        result = await db.execute(select(Member).filter_by(user_id=user_id, company_id=company_id))
         member = result.scalars().first()
         if member:
             member.is_admin = is_admin
@@ -61,22 +51,14 @@ class MemberRepository:
             await db.refresh(member)
         return member
 
-    async def member_exists(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ) -> bool:
-        result = await db.execute(
-            select(Member).filter_by(user_id=user_id, company_id=company_id)
-        )
+    async def member_exists(self, db: AsyncSession, user_id: int, company_id: int) -> bool:
+        result = await db.execute(select(Member).filter_by(user_id=user_id, company_id=company_id))
         member = result.scalars().first()
         if member:
-            raise HTTPException(
-                status_code=400, detail="Membership or invite already exists"
-            )
+            raise HTTPException(status_code=400, detail="Membership or invite already exists")
         return False
 
-    async def delete_member(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ) -> Member:
+    async def delete_member(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
         member = await self.get_member(db, user_id, company_id)
         if member.type == "auto":
             raise HTTPException(
@@ -91,9 +73,7 @@ class MemberRepository:
     async def get_all_members(
         self, db: AsyncSession, company_id: int, skip: int = 0, limit: int = 10
     ) -> Sequence[Member]:
-        result = await db.execute(
-            select(Member).filter_by(company_id=company_id).offset(skip).limit(limit)
-        )
+        result = await db.execute(select(Member).filter_by(company_id=company_id).offset(skip).limit(limit))
         return result.scalars().all()
 
     async def get_all_requests_or_invites_by_user(
@@ -128,27 +108,19 @@ class MemberRepository:
             raise HTTPException(status_code=404, detail="Company not found")
         return True
 
-    async def accept_membership_request(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ) -> Member:
+    async def accept_membership_request(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
         member = await self.get_member(db, user_id, company_id)
         if member.status != "pending":
-            raise HTTPException(
-                status_code=400, detail="Only pending requests can be accepted"
-            )
+            raise HTTPException(status_code=400, detail="Only pending requests can be accepted")
         member.status = "active"
         await db.commit()
         await db.refresh(member)
         return member
 
-    async def accept_invite(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ) -> Member:
+    async def accept_invite(self, db: AsyncSession, user_id: int, company_id: int) -> Member:
         member = await self.get_member(db, user_id, company_id)
         if member.status != "pending" or member.type != "invite":
-            raise HTTPException(
-                status_code=400, detail="Only pending invites can be accepted"
-            )
+            raise HTTPException(status_code=400, detail="Only pending invites can be accepted")
         member.status = "active"
         await db.commit()
         await db.refresh(member)
@@ -173,11 +145,7 @@ class MemberRepository:
     async def get_memberships_all_my_companies(
         self, db: AsyncSession, user_id: int, type: str = None, status: str = None
     ) -> list[Member]:
-        query = (
-            select(Member)
-            .join(Company, Company.id == Member.company_id)
-            .filter(Company.owner_id == user_id)
-        )
+        query = select(Member).join(Company, Company.id == Member.company_id).filter(Company.owner_id == user_id)
         if type:
             query = query.filter(Member.type == type)
         if status:

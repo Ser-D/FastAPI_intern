@@ -23,19 +23,11 @@ class User(Base):
     avatar: Mapped[str] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), onupdate=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     refresh_token: Mapped[str] = mapped_column(String(), nullable=True)
-    companies: Mapped[List["Company"]] = relationship(
-        "Company", back_populates="owner", cascade="all, delete-orphan"
-    )
-    members: Mapped[List["Member"]] = relationship(
-        "Member", back_populates="user", cascade="all, delete-orphan"
-    )
+    companies: Mapped[List] = relationship("Company", back_populates="owner", cascade="all, delete-orphan")
+    members: Mapped[List] = relationship("Member", back_populates="user", cascade="all, delete-orphan")
     quiz_results = relationship("QuizResult", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
 

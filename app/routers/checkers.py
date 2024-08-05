@@ -1,5 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter
-
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +7,6 @@ from app.db.postgres import get_database
 from app.db.redis import redis_client
 
 router = APIRouter(prefix="", tags=["checkers"])
-
 
 
 @router.get("/")
@@ -22,9 +20,7 @@ async def healthchecker(db: AsyncSession = Depends(get_database)):
         result = await db.execute(select(1))
         result = result.fetchone()
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Database is not configured correctly"
-            )
+            raise HTTPException(status_code=500, detail="Database is not configured correctly")
         return {"message": "Welcome to FastAPI"}
     except Exception as e:
         logger.error(f"Error connecting to the database: {e}")

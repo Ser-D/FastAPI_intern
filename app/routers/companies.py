@@ -21,9 +21,7 @@ async def create_company(
     company_in: CompanyCreate,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
-    company = await Company.create_with_owner(
-        db=db, **company_in.dict(), owner_id=current_user.id
-    )
+    company = await Company.create_with_owner(db=db, **company_in.dict(), owner_id=current_user.id)
     member_create = MemberCreate(
         company_id=company.id,
         user_id=current_user.id,
@@ -53,9 +51,7 @@ async def get_my_companies(
     limit: int = 10,
     current_user: User = Depends(auth_service.get_current_user),
 ) -> List[CompanyDetail]:
-    companies = await Company.get_all_by_owner(
-        db, owner_id=current_user.id, skip=skip, limit=limit
-    )
+    companies = await Company.get_all_by_owner(db, owner_id=current_user.id, skip=skip, limit=limit)
     return companies
 
 
@@ -66,9 +62,7 @@ async def membership_all_companies(
     type: str = Query(None, description="Type of membership: invite or request"),
     status: str = Query(None, description="Status of membership: active or pending"),
 ):
-    memberships = await member_repository.get_memberships_all_my_companies(
-        db, current_user.id, type, status
-    )
+    memberships = await member_repository.get_memberships_all_my_companies(db, current_user.id, type, status)
     return memberships
 
 
@@ -94,9 +88,7 @@ async def update_company(
     current_user: User = Depends(auth_service.get_current_user),
 ) -> CompanyDetail:
     company_data = company_in.model_dump()
-    company = await Company.update(
-        db=db, company_id=company_id, user=current_user.id, **company_data
-    )
+    company = await Company.update(db=db, company_id=company_id, user=current_user.id, **company_data)
     return company
 
 

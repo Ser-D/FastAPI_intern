@@ -23,9 +23,7 @@ async def get_my_requests(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    return await member_repository.get_all_requests_or_invites_by_user(
-        db, current_user.id, type="request"
-    )
+    return await member_repository.get_all_requests_or_invites_by_user(db, current_user.id, type="request")
 
 
 @router.get("/invites", response_model=list[MemberDetail])
@@ -33,9 +31,7 @@ async def get_my_invites(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    return await member_repository.get_all_requests_or_invites_by_user(
-        db, current_user.id, type="invite"
-    )
+    return await member_repository.get_all_requests_or_invites_by_user(db, current_user.id, type="invite")
 
 
 @router.post("/invites/{company_id}", response_model=MemberDetail)
@@ -44,9 +40,7 @@ async def accept_invite(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    accepted_member = await member_repository.accept_invite(
-        db, current_user.id, company_id
-    )
+    accepted_member = await member_repository.accept_invite(db, current_user.id, company_id)
     return accepted_member
 
 
@@ -77,9 +71,7 @@ async def leave_company(
 ):
     await member_repository.get_member(db, current_user.id, company_id)
 
-    deleted_member = await member_repository.delete_member(
-        db, current_user.id, company_id
-    )
+    deleted_member = await member_repository.delete_member(db, current_user.id, company_id)
     return deleted_member
 
 
@@ -92,15 +84,11 @@ async def get_notifications(
     return notifications
 
 
-@router.put(
-    "/notifications/{notification_id}/read", response_model=NotificationResponse
-)
+@router.put("/notifications/{notification_id}/read", response_model=NotificationResponse)
 async def mark_notification_as_read(
     notification_id: int,
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    notification = await notification_repo.mark_notification_as_read(
-        db, notification_id, current_user.id
-    )
+    notification = await notification_repo.mark_notification_as_read(db, notification_id, current_user.id)
     return notification

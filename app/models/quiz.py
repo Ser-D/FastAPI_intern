@@ -12,9 +12,7 @@ class Quiz(Base):
     description: Mapped[str] = mapped_column(String, nullable=False)
     question_ids: Mapped[list[int]] = mapped_column(ARRAY(Integer), nullable=False)
     usage_count: Mapped[int] = mapped_column(Integer, default=0)
-    company_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("companies.id"), nullable=False
-    )
+    company_id: Mapped[int] = mapped_column(Integer, ForeignKey("companies.id"), nullable=False)
 
     company = relationship("Company", back_populates="quizzes")
     quiz_results = relationship("QuizResult", back_populates="quiz")

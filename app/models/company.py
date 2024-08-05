@@ -8,7 +8,6 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
-from app.models.members import Member
 
 
 class Company(Base):
@@ -20,12 +19,8 @@ class Company(Base):
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     is_visible: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    owner: Mapped["User"] = relationship(
-        "User", back_populates="companies", collection_class=list
-    )
-    members: Mapped[List["Member"]] = relationship(
-        "Member", back_populates="company", cascade="all, delete-orphan"
-    )
+    owner: Mapped = relationship("User", back_populates="companies", collection_class=list)
+    members: Mapped[List] = relationship("Member", back_populates="company", cascade="all, delete-orphan")
     questions = relationship("Question", back_populates="company")
     quizzes = relationship("Quiz", back_populates="company")
     quiz_results = relationship("QuizResult", back_populates="company")
@@ -44,30 +39,18 @@ class Company(Base):
         return result.scalar_one_or_none()
 
     @classmethod
-    async def get_my_company(
-        cls, db: AsyncSession, company_id: int, owner_id: int
-    ) -> "Company":
-        result = await db.execute(
-            select(cls).filter_by(id=company_id, owner_id=owner_id)
-        )
+    async def get_my_company(cls, db: AsyncSession, company_id: int, owner_id: int) -> "Company":
+        result = await db.execute(select(cls).filter_by(id=company_id, owner_id=owner_id))
         return result.scalar_one_or_none()
 
     @classmethod
-    async def get_all(
-        cls, db: AsyncSession, skip: int, limit: int
-    ) -> Sequence["Company"]:
-        result = await db.execute(
-            select(cls).filter_by(is_visible=True).offset(skip).limit(limit)
-        )
+    async def get_all(cls, db: AsyncSession, skip: int, limit: int) -> Sequence["Company"]:
+        result = await db.execute(select(cls).filter_by(is_visible=True).offset(skip).limit(limit))
         return result.scalars().all()
 
     @classmethod
-    async def get_all_by_owner(
-        cls, db: AsyncSession, owner_id: int, skip: int, limit: int
-    ) -> Sequence["Company"]:
-        result = await db.execute(
-            select(cls).filter_by(owner_id=owner_id).offset(skip).limit(limit)
-        )
+    async def get_all_by_owner(cls, db: AsyncSession, owner_id: int, skip: int, limit: int) -> Sequence["Company"]:
+        result = await db.execute(select(cls).filter_by(owner_id=owner_id).offset(skip).limit(limit))
         return result.scalars().all()
 
     @classmethod
@@ -78,9 +61,7 @@ class Company(Base):
         return company
 
     @classmethod
-    async def update(
-        cls, db: AsyncSession, company_id: int, user: int, **kwargs
-    ) -> "Company":
+    async def update(cls, db: AsyncSession, company_id: int, user: int, **kwargs) -> "Company":
         company = await cls.get_my_company(db, company_id, user)
         if not company:
             raise HTTPException(status_code=404, detail="Company not found")

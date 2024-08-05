@@ -5,13 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core import messages
 from app.db.postgres import get_database
 from app.models.users import User
-from app.schemas.users import (
-    LogoutResponse,
-    SignInRequest,
-    SignUpRequest,
-    TokenSchema,
-    UserSchema,
-)
+from app.schemas.users import LogoutResponse, SignInRequest, SignUpRequest, TokenSchema, UserSchema
 from app.services.auth import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -35,9 +29,7 @@ async def login(
     access_token = await auth_service.create_access_token(data={"sub": user.email})
     refresh_token = await auth_service.create_refresh_token(data={"sub": user.email})
     await User.update_token(user.id, refresh_token, db)
-    return TokenSchema(
-        access_token=access_token, refresh_token=refresh_token, token_type="bearer"
-    )
+    return TokenSchema(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
 
 @router.get("/refresh_token", response_model=TokenSchema)
@@ -66,9 +58,7 @@ async def refresh_token(
     }
 
 
-@router.post(
-    "/logout", response_model=LogoutResponse, status_code=status.HTTP_202_ACCEPTED
-)
+@router.post("/logout", response_model=LogoutResponse, status_code=status.HTTP_202_ACCEPTED)
 async def logout(
     user=Depends(auth_service.get_current_user),
     db=Depends(get_database),

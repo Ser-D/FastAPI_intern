@@ -10,9 +10,7 @@ from app.schemas.questions import QuestionCreate, QuestionUpdate
 
 
 class QuestionRepository:
-    async def check_if_admin(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ) -> None:
+    async def check_if_admin(self, db: AsyncSession, user_id: int, company_id: int) -> None:
         admin_check = await db.execute(
             select(Member).where(
                 Member.company_id == company_id,
@@ -22,9 +20,7 @@ class QuestionRepository:
         )
         admin = admin_check.scalar_one_or_none()
         if not admin:
-            raise HTTPException(
-                status_code=403, detail="Not authorized to perform this action"
-            )
+            raise HTTPException(status_code=403, detail="Not authorized to perform this action")
 
     async def create_question(
         self, db: AsyncSession, question: QuestionCreate, company_id: int, user_id: int
@@ -36,10 +32,7 @@ class QuestionRepository:
                 status_code=400,
                 detail="Number of answer options must be between 2 and 4.",
             )
-        if any(
-            int(correct_answer) > len(question.answer_options)
-            for correct_answer in question.correct_answers
-        ):
+        if any(int(correct_answer) > len(question.answer_options) for correct_answer in question.correct_answers):
             raise HTTPException(
                 status_code=400,
                 detail="Correct answers must be valid indices of answer options.",
@@ -56,13 +49,9 @@ class QuestionRepository:
         await db.refresh(db_question)
         return db_question
 
-    async def get_questions(
-        self, db: AsyncSession, company_id: int, user_id: int
-    ) -> List[QuestionModel]:
+    async def get_questions(self, db: AsyncSession, company_id: int, user_id: int) -> List[QuestionModel]:
         await self.check_if_admin(db, user_id=user_id, company_id=company_id)
-        result = await db.execute(
-            select(QuestionModel).where(QuestionModel.company_id == company_id)
-        )
+        result = await db.execute(select(QuestionModel).where(QuestionModel.company_id == company_id))
         return result.scalars().all()
 
     async def update_question(
@@ -84,10 +73,7 @@ class QuestionRepository:
                 status_code=400,
                 detail="Number of answer options must be between 2 and 4.",
             )
-        if any(
-            int(correct_answer) > len(question.answer_options)
-            for correct_answer in question.correct_answers
-        ):
+        if any(int(correct_answer) > len(question.answer_options) for correct_answer in question.correct_answers):
             raise HTTPException(
                 status_code=400,
                 detail="Correct answers must be valid indices of answer options.",
@@ -95,9 +81,7 @@ class QuestionRepository:
 
         db_question.text = question.text
         db_question.answer_options = question.answer_options
-        db_question.correct_answers = [
-            str(answer) for answer in question.correct_answers
-        ]
+        db_question.correct_answers = [str(answer) for answer in question.correct_answers]
         await db.commit()
         await db.refresh(db_question)
         return db_question

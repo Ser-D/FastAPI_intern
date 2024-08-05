@@ -31,9 +31,7 @@ async def get_questions_endpoint(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    questions = await question_repository.get_questions(
-        db=db, company_id=company_id, user_id=current_user.id
-    )
+    questions = await question_repository.get_questions(db=db, company_id=company_id, user_id=current_user.id)
     return questions
 
 
