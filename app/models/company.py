@@ -13,14 +13,14 @@ from app.models.base import Base
 class Company(Base):
     __tablename__ = "companies"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String, index=True)
-    description: Mapped[str] = mapped_column(String, index=True)
-    owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    is_visible: Mapped[bool] = mapped_column(Boolean, default=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name = mapped_column(String, index=True)
+    description = mapped_column(String, index=True)
+    owner_id = mapped_column(Integer, ForeignKey("users.id"))
+    is_visible = mapped_column(Boolean, default=True)
 
     owner = relationship("User", back_populates="companies", collection_class=list)
-    members: Mapped[List] = relationship("Member", back_populates="company", cascade="all, delete-orphan")
+    members = relationship("Member", back_populates="company", cascade="all, delete-orphan")
     questions = relationship("Question", back_populates="company")
     quizzes = relationship("Quiz", back_populates="company")
     quiz_results = relationship("QuizResult", back_populates="company")
