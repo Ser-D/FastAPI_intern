@@ -2,6 +2,11 @@
 # Attention
 # Achtung
 
+# View application
+
+http://13.49.240.47:8000/docs#/
+
+
 Commands to run the application
 
     ```bash
