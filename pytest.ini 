@@ -1,0 +1,8 @@
+[pytest]
+pythonpath = . app
+
+filterwarnings =
+    ignore::DeprecationWarning
+    ignore:.*is deprecated and will be removed.*:DeprecationWarning
+    ignore:Support for class-based `config` is deprecated.*:DeprecationWarning
+    ignore:'crypt' is deprecated and slated for removal in Python 3.13:DeprecationWarning
