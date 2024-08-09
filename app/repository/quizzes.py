@@ -260,7 +260,7 @@ class QuizRepository:
                 {
                     "question_text": question.text,
                     "question_answer_options": question.answer_options,
-                    "response": redis_response.dict(),
+                    "response": redis_response.model_dump(),
                 }
             )
 

@@ -1,48 +1,90 @@
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
-import pytest_asyncio
-from sqlalchemy.ext.asyncio import AsyncSession
+import pytest
+from faker import Faker
 
-from app.db.postgres import get_database
-from app.models.users import User
-from app.services.auth import Auth
-
-
-@pytest_asyncio.fixture
-async def async_session():
-    # Setup: створюємо сесію бази даних
-    async for session in get_database():
-        yield session
+from app.schemas.members import MemberCreate
+from app.schemas.quizzes import QuizCreate, QuizRunResponse, QuizUpdate
 
 
-@pytest_asyncio.fixture
-async def mock_db():
-    db = AsyncMock(AsyncSession)
-    return db
+@pytest.fixture(scope="session")
+def faker():
+    return Faker()
 
 
-@pytest_asyncio.fixture
-async def auth():
-    return Auth()
+@pytest.fixture
+def mock_db_session():
+    mock_session = AsyncMock()
+    return mock_session
 
 
-@pytest_asyncio.fixture
-def mock_user():
-    return User(
-        id=1,
-        email="test@example.com",
-        hashed_password=Auth().get_password_hash("password"),
-        is_active=True,
+@pytest.fixture
+def mock_user_model():
+    user = AsyncMock()
+    user.create = AsyncMock()
+    user.get_user_by_email = AsyncMock()
+    user.update = AsyncMock()
+    user.delete = AsyncMock()
+    return user
+
+
+@pytest.fixture
+def user_data(faker):
+    return {
+        "firstname": faker.first_name(),
+        "lastname": faker.last_name(),
+        "email": faker.email(),
+        "hashed_password": faker.password(),
+        "city": faker.city(),
+        "phone": faker.phone_number(),
+        "avatar": faker.image_url(),
+    }
+
+
+@pytest.fixture
+def company_data(faker):
+    return {
+        "name": faker.company(),
+        "description": faker.catch_phrase(),
+        "owner_id": 1,
+        "is_visible": True,
+    }
+
+
+@pytest.fixture
+def member_data(faker):
+    return MemberCreate(user_id=1, company_id=1, type="invite", status="pending")
+
+
+@pytest.fixture
+def quiz_create_data(faker):
+    return QuizCreate(
+        title=faker.sentence(),
+        description=faker.text(),
+        question_ids=[1, 2, 3],
+        usage_count=0,
     )
 
 
-@pytest_asyncio.fixture
-async def valid_token(mock_user):
-    data = {"sub": mock_user.email}
-    return await Auth().create_access_token(data)
+@pytest.fixture
+def quiz_update_data(faker):
+    return QuizUpdate(
+        title=faker.sentence(),
+        description=faker.text(),
+        question_ids=[1, 2, 3],
+        usage_count=1,
+    )
 
 
-@pytest_asyncio.fixture
-async def expired_token(mock_user):
-    data = {"sub": mock_user.email, "exp": 0}
-    return await Auth().create_access_token(data)
+@pytest.fixture
+def quiz_run_responses(faker):
+    return [
+        QuizRunResponse(selected_answers=[faker.random_int(min=1, max=10)])
+        for _ in range(3)
+    ]
+
+
+@pytest.fixture
+def mock_redis_client():
+    with patch("app.db.redis.redis_client", new_callable=AsyncMock) as mock:
+        yield mock
