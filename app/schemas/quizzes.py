@@ -1,6 +1,6 @@
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.questions import QuestionBase
 
@@ -8,14 +8,14 @@ from app.schemas.questions import QuestionBase
 class QuizCreate(BaseModel):
     title: str
     description: str
-    question_ids: List[int] = Field(..., min_items=2)
+    question_ids: List[int] = Field(..., min_length=2)
     usage_count: int = 0
 
 
 class QuizUpdate(BaseModel):
     title: str
     description: str
-    question_ids: List[int] = Field(..., min_items=2)
+    question_ids: List[int] = Field(..., min_length=2)
     usage_count: int = 0
 
 
@@ -27,8 +27,7 @@ class Quiz(BaseModel):
     usage_count: int
     company_id: int
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class QuizRunResponse(BaseModel):
@@ -41,9 +40,7 @@ class QuizWithQuestions(BaseModel):
     description: str
     questions: List[QuestionBase]
 
-    class Config:
-        from_attributes = True
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
 
 class QuizResult(BaseModel):

@@ -1,5 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter
-
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +7,6 @@ from app.db.postgres import get_database
 from app.db.redis import redis_client
 
 router = APIRouter(prefix="", tags=["checkers"])
-
 
 
 @router.get("/")
