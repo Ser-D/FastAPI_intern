@@ -1,0 +1,92 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install poetry
+        poetry install
+
+    - name: Build Docker image
+      run: |
+        docker build -t my-fastapi-app .
+
+    - name: Push Docker image to Docker Hub
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      run: |
+        echo $DOCKER_HUB_ACCESS_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+        docker tag my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+        docker push $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Ensure SSH key file exists
+      run: |
+        echo "${{ secrets.AWS_EC2_KEY }}" > ec2_key.pem
+        chmod 400 ec2_key.pem
+
+    - name: Install Docker on EC2
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
+          sudo usermod -aG docker ubuntu
+        EOF
+
+    - name: Test SSH connection
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} exit
+
+    - name: Upload .env.sample to EC2 and rename
+      run: |
+        scp -o StrictHostKeyChecking=no -i "ec2_key.pem" .env.sample ubuntu@${{ secrets.AWS_EC2_HOST }}:/home/ubuntu/.env
+
+    - name: Deploy to AWS EC2
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      run: |
+        ssh -o StrictHostKeyChecking=no -i "ec2_key.pem" ubuntu@${{ secrets.AWS_EC2_HOST }} << 'EOF'
+          export DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
+          sudo docker pull $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+          sudo docker stop my-fastapi-app || true
+          sudo docker rm my-fastapi-app || true
+          sudo docker run -d --env-file /home/ubuntu/.env -p 80:8000 --name my-fastapi-app $DOCKER_HUB_USERNAME/my-fastapi-app:latest
+        EOF

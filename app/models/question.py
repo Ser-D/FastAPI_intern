@@ -13,8 +13,6 @@ class Question(Base):
     text: Mapped[str] = mapped_column(String, nullable=False)
     answer_options: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False)
     correct_answers: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False)
-    company_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("companies.id"), nullable=False
-    )
+    company_id: Mapped[int] = mapped_column(Integer, ForeignKey("companies.id"), nullable=False)
 
     company = relationship("Company", back_populates="questions")

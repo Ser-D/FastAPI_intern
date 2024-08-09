@@ -43,24 +43,18 @@ async def get_user_quiz_completions(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    quiz_completions = await analytics_service.get_user_quiz_completions(
-        db, current_user.id
-    )
+    quiz_completions = await analytics_service.get_user_quiz_completions(db, current_user.id)
     return quiz_completions
 
 
-@router.get(
-    "/company/{company_id}/weekly-average-scores", response_model=List[WeeklyScores]
-)
+@router.get("/company/{company_id}/weekly-average-scores", response_model=List[WeeklyScores])
 async def get_company_weekly_average_scores(
     company_id: int,
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
     await question_repository.check_if_admin(db, current_user.id, company_id)
-    weekly_scores = await analytics_service.get_company_weekly_average_scores(
-        db, company_id
-    )
+    weekly_scores = await analytics_service.get_company_weekly_average_scores(db, company_id)
     return weekly_scores
 
 
@@ -78,15 +72,11 @@ async def get_user_quiz_scores_over_time(
 
     await analytics_service.is_user_member_of_company(db, user_id, company_id)
 
-    weekly_scores = await analytics_service.get_user_quiz_scores_over_time(
-        db, user_id, company_id
-    )
+    weekly_scores = await analytics_service.get_user_quiz_scores_over_time(db, user_id, company_id)
     return weekly_scores
 
 
-@router.get(
-    "/company/{company_id}/quiz-completions", response_model=List[MemberQuizCompletion]
-)
+@router.get("/company/{company_id}/quiz-completions", response_model=List[MemberQuizCompletion])
 async def get_company_quiz_completions(
     company_id: int,
     db: AsyncSession = Depends(get_database),
@@ -94,7 +84,5 @@ async def get_company_quiz_completions(
 ):
     await question_repository.check_if_admin(db, current_user.id, company_id)
 
-    quiz_completions = await analytics_service.get_company_quiz_completions(
-        db, company_id
-    )
+    quiz_completions = await analytics_service.get_company_quiz_completions(db, company_id)
     return quiz_completions

@@ -29,9 +29,7 @@ class QuizResultRepository:
         await db.refresh(quiz_result)
         return quiz_result
 
-    async def calculate_user_average_score_in_company(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ):
+    async def calculate_user_average_score_in_company(self, db: AsyncSession, user_id: int, company_id: int):
         result = await db.execute(
             select(
                 func.sum(QuizResult.total_questions).label("total_questions"),
@@ -45,11 +43,7 @@ class QuizResultRepository:
         total_questions = data.total_questions or 0
         total_correct_answers = data.total_correct_answers or 0
 
-        percentage = (
-            (total_correct_answers / total_questions * 100)
-            if total_questions > 0
-            else 0
-        )
+        percentage = (total_correct_answers / total_questions * 100) if total_questions > 0 else 0
 
         return {
             "user_id": user_id,
@@ -59,9 +53,7 @@ class QuizResultRepository:
             "percentage": percentage,
         }
 
-    async def calculate_user_average_score_systemwide(
-        self, db: AsyncSession, user_id: int
-    ):
+    async def calculate_user_average_score_systemwide(self, db: AsyncSession, user_id: int):
         result = await db.execute(
             select(
                 func.sum(QuizResult.total_questions).label("total_questions"),
@@ -73,11 +65,7 @@ class QuizResultRepository:
         total_questions = data.total_questions or 0
         total_correct_answers = data.total_correct_answers or 0
 
-        percentage = (
-            (total_correct_answers / total_questions * 100)
-            if total_questions > 0
-            else 0
-        )
+        percentage = (total_correct_answers / total_questions * 100) if total_questions > 0 else 0
 
         return {
             "user_id": user_id,

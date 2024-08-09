@@ -19,9 +19,7 @@ async def membership_company(
     status: str = Query(None, description="Status of membership: active or pending"),
 ):
     await member_repository.is_owner(db, current_user.id, company_id)
-    memberships = await member_repository.get_memberships_my_company(
-        db, current_user.id, company_id, type, status
-    )
+    memberships = await member_repository.get_memberships_my_company(db, current_user.id, company_id, type, status)
     return memberships
 
 
@@ -33,9 +31,7 @@ async def accept_request(
     current_user: User = Depends(auth_service.get_current_user),
 ):
     await member_repository.is_owner(db, current_user.id, company_id)
-    accepted_member = await member_repository.accept_membership_request(
-        db, user_id, company_id
-    )
+    accepted_member = await member_repository.accept_membership_request(db, user_id, company_id)
     return accepted_member
 
 

@@ -26,9 +26,7 @@ async def get_user_average_score_in_company(
     current_user: User = Depends(auth_service.get_current_user),
 ):
     repo = QuizResultRepository()
-    average_score = await repo.calculate_user_average_score_in_company(
-        db, user_id, company_id
-    )
+    average_score = await repo.calculate_user_average_score_in_company(db, user_id, company_id)
 
     if not average_score:
         raise HTTPException(
@@ -49,9 +47,7 @@ async def get_user_average_score_systemwide(
     average_score = await repo.calculate_user_average_score_systemwide(db, user_id)
 
     if not average_score:
-        raise HTTPException(
-            status_code=404, detail="No quiz results found for the user"
-        )
+        raise HTTPException(status_code=404, detail="No quiz results found for the user")
 
     return average_score
 
@@ -72,9 +68,7 @@ async def get_quiz_responses(user_id: int, quiz_id: int):
 
 
 @router.get("/quizzes/responses", response_model=list)
-async def get_user_quiz_result(
-    quiz_id: int = None, current_user: User = Depends(auth_service.get_current_user)
-):
+async def get_user_quiz_result(quiz_id: int = None, current_user: User = Depends(auth_service.get_current_user)):
     return await redis_service.get_user_quiz_responses(quiz_id, current_user.id)
 
 
@@ -103,8 +97,6 @@ async def export_quiz_results(
 ):
     await quiz_repository.check_if_admin(db, current_user.id, company_id)
 
-    results = await redis_service.get_company_quiz_responses(
-        quiz_id, company_id, user_id
-    )
+    results = await redis_service.get_company_quiz_responses(quiz_id, company_id, user_id)
 
     return redis_service.export_quiz_results(results, format, save_path)

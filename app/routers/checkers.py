@@ -20,9 +20,7 @@ async def healthchecker(db: AsyncSession = Depends(get_database)):
         result = await db.execute(select(1))
         result = result.fetchone()
         if result is None:
-            raise HTTPException(
-                status_code=500, detail="Database is not configured correctly"
-            )
+            raise HTTPException(status_code=500, detail="Database is not configured correctly")
         return {"message": "Welcome to FastAPI"}
     except Exception as e:
         logger.error(f"Error connecting to the database: {e}")

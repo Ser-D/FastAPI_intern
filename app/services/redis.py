@@ -30,15 +30,11 @@ class RedisService:
                 if data:
                     results.append(json.loads(data))
             if not results:
-                raise HTTPException(
-                    status_code=404, detail="No quiz responses found for this user."
-                )
+                raise HTTPException(status_code=404, detail="No quiz responses found for this user.")
             return results
 
     @staticmethod
-    async def get_company_quiz_responses(
-        quiz_id: int, company_id: int, user_id: int = None
-    ) -> list:
+    async def get_company_quiz_responses(quiz_id: int, company_id: int, user_id: int = None) -> list:
         results = []
 
         pattern = f"quiz_responses:*:{quiz_id}"
@@ -63,12 +59,8 @@ class RedisService:
         return results
 
     @staticmethod
-    def export_quiz_results(
-        results: list, format: str, save_path: str
-    ) -> StreamingResponse:
-        quiz_data_list = [
-            result["quiz_data"] for result in results if "quiz_data" in result
-        ]
+    def export_quiz_results(results: list, format: str, save_path: str) -> StreamingResponse:
+        quiz_data_list = [result["quiz_data"] for result in results if "quiz_data" in result]
 
         if format == "csv":
             output = io.StringIO()
@@ -83,9 +75,7 @@ class RedisService:
             return StreamingResponse(
                 output,
                 media_type="text/csv",
-                headers={
-                    "Content-Disposition": "attachment; filename=quiz_results.csv"
-                },
+                headers={"Content-Disposition": "attachment; filename=quiz_results.csv"},
             )
         else:
             output = io.StringIO()
@@ -95,9 +85,7 @@ class RedisService:
             return StreamingResponse(
                 output,
                 media_type="application/json",
-                headers={
-                    "Content-Disposition": "attachment; filename=quiz_results.json"
-                },
+                headers={"Content-Disposition": "attachment; filename=quiz_results.json"},
             )
 
     @staticmethod

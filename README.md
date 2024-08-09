@@ -2,6 +2,11 @@
 # Attention
 # Achtung
 
+# View application
+
+http://13.49.240.47:8000/docs#/
+
+
 Commands to run the application
 
     ```bash
@@ -61,7 +66,7 @@ To run the application with Docker Compose, execute the following commands:
 
 ### Build and start the containers:    
     ```bash
-    docker-compose up --build
+    docker-compose up  
     docker-compose up -d
     docker-compose -f docker-compose.local.yml up -d
     docker-compose -f docker-compose.nonlocal.yml up --build

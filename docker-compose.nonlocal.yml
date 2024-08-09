@@ -4,9 +4,6 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --reload
     ports:
       - "${PORT}:${PORT}"
-    depends_on:
-      - postgres
-      - redis
     environment:
       - DATABASE_URL_1=${DATABASE_URL}
       - REDIS_URL_1=${REDIS_URL}
@@ -14,26 +11,4 @@ services:
     volumes:
       - .:/app
     env_file:
-      - .env.nonlocal
-
-  postgres:
-    image: postgres:16
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    env_file:
-      - .env.nonlocal
-
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    env_file:
-      - .env.nonlocal
-
-
-volumes:
-  postgres_data:
-
+      - .env

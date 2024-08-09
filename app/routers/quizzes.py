@@ -6,13 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.postgres import get_database
 from app.models.users import User
 from app.repository.quizzes import quiz_repository
-from app.schemas.quizzes import (
-    QuestionBase,
-    Quiz,
-    QuizCreate,
-    QuizRunResponse,
-    QuizWithQuestions,
-)
+from app.schemas.quizzes import QuestionBase, Quiz, QuizCreate, QuizRunResponse, QuizWithQuestions
 from app.services.auth import auth_service
 
 router = APIRouter(prefix="/quizzes/{company_id}/quizzes", tags=["quizzes"])
@@ -25,13 +19,9 @@ async def create_quiz_endpoint(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    await quiz_repository.check_if_admin(
-        db, user_id=current_user.id, company_id=company_id
-    )
+    await quiz_repository.check_if_admin(db, user_id=current_user.id, company_id=company_id)
 
-    created_quiz = await quiz_repository.create_quiz(
-        db=db, quiz=quiz, company_id=company_id, user_id=current_user.id
-    )
+    created_quiz = await quiz_repository.create_quiz(db=db, quiz=quiz, company_id=company_id, user_id=current_user.id)
     return created_quiz
 
 
@@ -43,9 +33,7 @@ async def get_quizzes_endpoint(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    await quiz_repository.check_if_admin(
-        db, user_id=current_user.id, company_id=company_id
-    )
+    await quiz_repository.check_if_admin(db, user_id=current_user.id, company_id=company_id)
 
     quizzes = await quiz_repository.get_quizzes(
         db=db, company_id=company_id, user_id=current_user.id, skip=skip, limit=limit
@@ -60,9 +48,7 @@ async def get_quiz_with_questions(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    await quiz_repository.check_if_admin(
-        db, user_id=current_user.id, company_id=company_id
-    )
+    await quiz_repository.check_if_admin(db, user_id=current_user.id, company_id=company_id)
 
     quiz, questions = await quiz_repository.get_quiz_with_questions(db, quiz_id)
     quiz_with_questions = QuizWithQuestions(
@@ -89,13 +75,9 @@ async def delete_quiz_endpoint(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    await quiz_repository.check_if_admin(
-        db, user_id=current_user.id, company_id=company_id
-    )
+    await quiz_repository.check_if_admin(db, user_id=current_user.id, company_id=company_id)
 
-    await quiz_repository.delete_quiz(
-        db=db, quiz_id=quiz_id, company_id=company_id, user_id=current_user.id
-    )
+    await quiz_repository.delete_quiz(db=db, quiz_id=quiz_id, company_id=company_id, user_id=current_user.id)
     return None
 
 
@@ -106,9 +88,7 @@ async def run_quiz_endpoint(
     db: AsyncSession = Depends(get_database),
     current_user: User = Depends(auth_service.get_current_user),
 ):
-    company_id = await quiz_repository.check_if_member(
-        db, user_id=current_user.id, quiz_id=quiz_id
-    )
+    company_id = await quiz_repository.check_if_member(db, user_id=current_user.id, quiz_id=quiz_id)
 
     result = await quiz_repository.run_quiz(
         db=db,

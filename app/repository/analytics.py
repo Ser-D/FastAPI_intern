@@ -20,9 +20,7 @@ from app.schemas.analytics import (
 
 class AnalyticsService:
     async def get_user_average_score(self, db: AsyncSession, user_id: int) -> float:
-        result = await db.execute(
-            select(func.avg(QuizResult.score)).where(QuizResult.user_id == user_id)
-        )
+        result = await db.execute(select(func.avg(QuizResult.score)).where(QuizResult.user_id == user_id))
         return result.scalar()
 
     async def get_user_quiz_scores(
@@ -55,9 +53,7 @@ class AnalyticsService:
             for row in result.all()
         ]
 
-    async def get_user_quiz_completions(
-        self, db: AsyncSession, user_id: int
-    ) -> List[QuizCompletion]:
+    async def get_user_quiz_completions(self, db: AsyncSession, user_id: int) -> List[QuizCompletion]:
         result = await db.execute(
             select(
                 QuizResult.quiz_id,
@@ -66,14 +62,9 @@ class AnalyticsService:
             .where(QuizResult.user_id == user_id)
             .group_by(QuizResult.quiz_id)
         )
-        return [
-            QuizCompletion(quiz_id=row[0], last_completed=row[1])
-            for row in result.all()
-        ]
+        return [QuizCompletion(quiz_id=row[0], last_completed=row[1]) for row in result.all()]
 
-    async def get_company_quiz_results(
-        self, db: AsyncSession, company_id: int
-    ) -> List[Tuple[int, datetime, float]]:
+    async def get_company_quiz_results(self, db: AsyncSession, company_id: int) -> List[Tuple[int, datetime, float]]:
         result = await db.execute(
             select(Member.user_id, QuizResult.completed_at, QuizResult.score)
             .join(QuizResult, QuizResult.user_id == Member.user_id)
@@ -82,9 +73,7 @@ class AnalyticsService:
         )
         return result.fetchall()
 
-    async def get_company_weekly_average_scores(
-        self, db: AsyncSession, company_id: int
-    ) -> List[WeeklyScores]:
+    async def get_company_weekly_average_scores(self, db: AsyncSession, company_id: int) -> List[WeeklyScores]:
         quiz_results = await self.get_company_quiz_results(db, company_id)
 
         if not quiz_results:
@@ -119,9 +108,7 @@ class AnalyticsService:
             week_start = datetime.strptime(week_start_str, "%Y-%m-%d")
             week_end = datetime.strptime(week_end_str, "%Y-%m-%d")
             user_weekly_scores = [
-                UserWeeklyScore(
-                    user_id=user_id, average_score=sum(scores) / len(scores)
-                )
+                UserWeeklyScore(user_id=user_id, average_score=sum(scores) / len(scores))
                 for user_id, scores in user_scores.items()
             ]
             weekly_averages.append(
@@ -136,19 +123,11 @@ class AnalyticsService:
 
         return weekly_dict
 
-    async def is_user_member_of_company(
-        self, db: AsyncSession, user_id: int, company_id: int
-    ):
-        result = await db.execute(
-            select(Member).where(
-                Member.user_id == user_id, Member.company_id == company_id
-            )
-        )
+    async def is_user_member_of_company(self, db: AsyncSession, user_id: int, company_id: int):
+        result = await db.execute(select(Member).where(Member.user_id == user_id, Member.company_id == company_id))
         member = result.scalars().first()
         if not member:
-            raise HTTPException(
-                status_code=404, detail="User is not a member of the company"
-            )
+            raise HTTPException(status_code=404, detail="User is not a member of the company")
         return member is not None
 
     async def get_user_quiz_scores_over_time(
@@ -193,9 +172,7 @@ class AnalyticsService:
             week_start = datetime.strptime(week_start_str, "%Y-%m-%d").date()
             week_end = datetime.strptime(week_end_str, "%Y-%m-%d").date()
             quiz_weekly_scores = [
-                QuizWeeklyScore(
-                    quiz_id=quiz_id, average_score=sum(scores) / len(scores)
-                )
+                QuizWeeklyScore(quiz_id=quiz_id, average_score=sum(scores) / len(scores))
                 for quiz_id, scores in quiz_scores.items()
             ]
             weekly_averages.append(
@@ -208,9 +185,7 @@ class AnalyticsService:
 
         return weekly_averages
 
-    async def get_company_quiz_completions(
-        self, db: AsyncSession, company_id: int
-    ) -> List[MemberQuizCompletion]:
+    async def get_company_quiz_completions(self, db: AsyncSession, company_id: int) -> List[MemberQuizCompletion]:
         result = await db.execute(
             select(
                 Member.user_id,
@@ -220,10 +195,7 @@ class AnalyticsService:
             .where(Member.company_id == company_id)
             .group_by(Member.user_id)
         )
-        return [
-            MemberQuizCompletion(user_id=row[0], last_completed=row[1])
-            for row in result.all()
-        ]
+        return [MemberQuizCompletion(user_id=row[0], last_completed=row[1]) for row in result.all()]
 
 
 analytics_service = AnalyticsService()

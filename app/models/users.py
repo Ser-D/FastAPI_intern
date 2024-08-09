@@ -1,11 +1,9 @@
 from collections.abc import Sequence
-from datetime import datetime
-from typing import List
 
-from sqlalchemy import Boolean, DateTime, Integer, String, func
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import relationship
 
 from app.models.base import Base
 
@@ -13,29 +11,22 @@ from app.models.base import Base
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    firstname: Mapped[str] = mapped_column(String(50))
-    lastname: Mapped[str] = mapped_column(String(50))
-    email: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    city: Mapped[str] = mapped_column(String(100), nullable=True)
-    phone: Mapped[str] = mapped_column(String(20), nullable=True)
-    avatar: Mapped[str] = mapped_column(String(255), nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=func.now(), onupdate=func.now(), nullable=False
-    )
-    refresh_token: Mapped[str] = mapped_column(String(), nullable=True)
-    companies: Mapped[List["Company"]] = relationship(
-        "Company", back_populates="owner", cascade="all, delete-orphan"
-    )
-    members: Mapped[List["Member"]] = relationship(
-        "Member", back_populates="user", cascade="all, delete-orphan"
-    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    firstname = Column(String(50))
+    lastname = Column(String(50))
+    email = Column(String(150), unique=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    city = Column(String(100), nullable=True)
+    phone = Column(String(20), nullable=True)
+    avatar = Column(String(255), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_superuser = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    refresh_token = Column(String(), nullable=True)
+
+    companies = relationship("Company", back_populates="owner", cascade="all, delete-orphan")
+    members = relationship("Member", back_populates="user", cascade="all, delete-orphan")
     quiz_results = relationship("QuizResult", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
 
