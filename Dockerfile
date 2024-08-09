@@ -12,7 +12,7 @@ COPY pyproject.toml poetry.lock ./
 
 # Встановіть залежності за допомогою Poetry
 RUN poetry config virtualenvs.create false && poetry install --no-root
-
+EXPOSE 8000
 # Скопіюйте залишок коду вашого додатку до контейнера
 COPY . .
 
