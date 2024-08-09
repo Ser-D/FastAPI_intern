@@ -15,9 +15,7 @@ async def test_check_if_admin_authorized(mock_db_session):
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = member
 
-    with patch.object(
-        mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result
-    ):
+    with patch.object(mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result):
         question_repo = QuestionRepository()
         await question_repo.check_if_admin(db=mock_db_session, user_id=1, company_id=1)
 
@@ -30,16 +28,10 @@ async def test_create_question(mock_db_session):
         correct_answers=["0"],
     )
 
-    with patch.object(
-        QuestionRepository, "check_if_admin", new_callable=AsyncMock, return_value=None
-    ):
+    with patch.object(QuestionRepository, "check_if_admin", new_callable=AsyncMock, return_value=None):
         with patch.object(mock_db_session, "add", new_callable=AsyncMock) as mock_add:
-            with patch.object(
-                mock_db_session, "commit", new_callable=AsyncMock
-            ) as mock_commit:
-                with patch.object(
-                    mock_db_session, "refresh", new_callable=AsyncMock
-                ) as mock_refresh:
+            with patch.object(mock_db_session, "commit", new_callable=AsyncMock) as mock_commit:
+                with patch.object(mock_db_session, "refresh", new_callable=AsyncMock) as mock_refresh:
                     question_repo = QuestionRepository()
                     created_question = await question_repo.create_question(
                         db=mock_db_session,
@@ -49,22 +41,14 @@ async def test_create_question(mock_db_session):
                     )
 
                     assert created_question.text == question_data.text
-                    assert (
-                        created_question.answer_options == question_data.answer_options
-                    )
+                    assert created_question.answer_options == question_data.answer_options
                     mock_add.assert_called_once()
                     mock_commit.assert_awaited_once()
 
                     refreshed_question = mock_refresh.call_args[0][0]
                     assert refreshed_question.text == question_data.text
-                    assert (
-                        refreshed_question.answer_options
-                        == question_data.answer_options
-                    )
-                    assert (
-                        refreshed_question.correct_answers
-                        == question_data.correct_answers
-                    )
+                    assert refreshed_question.answer_options == question_data.answer_options
+                    assert refreshed_question.correct_answers == question_data.correct_answers
 
 
 @pytest.mark.asyncio
@@ -77,21 +61,15 @@ async def test_get_questions(mock_db_session):
         company_id=1,
     )
 
-    with patch.object(
-        QuestionRepository, "check_if_admin", new_callable=AsyncMock, return_value=None
-    ):
+    with patch.object(QuestionRepository, "check_if_admin", new_callable=AsyncMock, return_value=None):
         mock_scalars = MagicMock()
         mock_scalars.all.return_value = [question_model]
         mock_result = MagicMock()
         mock_result.scalars.return_value = mock_scalars
 
-        with patch.object(
-            mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result
-        ):
+        with patch.object(mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result):
             question_repo = QuestionRepository()
-            questions = await question_repo.get_questions(
-                db=mock_db_session, company_id=1, user_id=1
-            )
+            questions = await question_repo.get_questions(db=mock_db_session, company_id=1, user_id=1)
 
             assert len(questions) == 1
             assert questions[0].text == question_model.text
@@ -119,15 +97,9 @@ async def test_update_question(mock_db_session):
         company_id=1,
     )
 
-    with patch.object(
-        QuestionRepository, "check_if_admin", new_callable=AsyncMock, return_value=None
-    ):
-        with patch.object(
-            mock_db_session, "get", new_callable=AsyncMock, return_value=question_model
-        ):
-            with patch.object(
-                mock_db_session, "commit", new_callable=AsyncMock
-            ) as mock_commit:
+    with patch.object(QuestionRepository, "check_if_admin", new_callable=AsyncMock, return_value=None):
+        with patch.object(mock_db_session, "get", new_callable=AsyncMock, return_value=question_model):
+            with patch.object(mock_db_session, "commit", new_callable=AsyncMock) as mock_commit:
                 with patch.object(
                     mock_db_session,
                     "refresh",
@@ -144,20 +116,13 @@ async def test_update_question(mock_db_session):
                     )
 
                     assert updated_question.text == question_data.text
-                    assert (
-                        updated_question.answer_options == question_data.answer_options
-                    )
-                    assert updated_question.correct_answers == [
-                        str(answer) for answer in question_data.correct_answers
-                    ]
+                    assert updated_question.answer_options == question_data.answer_options
+                    assert updated_question.correct_answers == [str(answer) for answer in question_data.correct_answers]
                     mock_commit.assert_awaited_once()
 
                     refreshed_question = mock_refresh.call_args[0][0]
                     assert refreshed_question.text == question_data.text
-                    assert (
-                        refreshed_question.answer_options
-                        == question_data.answer_options
-                    )
+                    assert refreshed_question.answer_options == question_data.answer_options
                     assert refreshed_question.correct_answers == [
                         str(answer) for answer in question_data.correct_answers
                     ]

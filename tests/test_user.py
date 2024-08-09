@@ -18,9 +18,7 @@ async def test_create_user(mock_db_session, user_data):
 async def test_get_user_by_email(mock_db_session, user_data):
     email = user_data["email"]
 
-    with patch.object(
-        User, "get_user_by_email", return_value=User(**user_data)
-    ) as mock_get_user_by_email:
+    with patch.object(User, "get_user_by_email", return_value=User(**user_data)) as mock_get_user_by_email:
         user = await User.get_user_by_email(db=mock_db_session, email=email)
 
         assert user.email == email
@@ -34,14 +32,10 @@ async def test_update_user(mock_db_session, user_data):
     user.firstname = updated_firstname
 
     with patch.object(User, "update", return_value=user) as mock_update:
-        updated_user = await User.update(
-            db=mock_db_session, user_id=1, firstname=updated_firstname
-        )
+        updated_user = await User.update(db=mock_db_session, user_id=1, firstname=updated_firstname)
 
         assert updated_user.firstname == updated_firstname
-        mock_update.assert_awaited_once_with(
-            db=mock_db_session, user_id=1, firstname=updated_firstname
-        )
+        mock_update.assert_awaited_once_with(db=mock_db_session, user_id=1, firstname=updated_firstname)
 
 
 @pytest.mark.asyncio

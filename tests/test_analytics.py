@@ -40,9 +40,7 @@ async def test_get_user_average_score(mock_db_session):
 
     with patch.object(mock_db_session, "execute", return_value=mock_result):
         analytics_service = AnalyticsService()
-        average_score = await analytics_service.get_user_average_score(
-            db=mock_db_session, user_id=1
-        )
+        average_score = await analytics_service.get_user_average_score(db=mock_db_session, user_id=1)
 
         assert average_score == 75.0
 
@@ -81,9 +79,7 @@ async def test_get_user_quiz_completions(mock_db_session):
 
     with patch.object(mock_db_session, "execute", return_value=mock_result):
         analytics_service = AnalyticsService()
-        completions = await analytics_service.get_user_quiz_completions(
-            db=mock_db_session, user_id=1
-        )
+        completions = await analytics_service.get_user_quiz_completions(db=mock_db_session, user_id=1)
 
         assert len(completions) == 1
         assert completions[0] == QuizCompletion(
@@ -101,9 +97,7 @@ async def test_get_company_quiz_results(mock_db_session):
 
     with patch.object(mock_db_session, "execute", return_value=mock_result):
         analytics_service = AnalyticsService()
-        results = await analytics_service.get_company_quiz_results(
-            db=mock_db_session, company_id=1
-        )
+        results = await analytics_service.get_company_quiz_results(db=mock_db_session, company_id=1)
 
         assert len(results) == 1
         assert results[0] == (1, datetime(2023, 1, 10), 75.0)
@@ -120,21 +114,15 @@ async def test_get_company_weekly_average_scores(mock_db_session):
         ],
     ):
         analytics_service = AnalyticsService()
-        weekly_scores = await analytics_service.get_company_weekly_average_scores(
-            db=mock_db_session, company_id=1
-        )
+        weekly_scores = await analytics_service.get_company_weekly_average_scores(db=mock_db_session, company_id=1)
 
         assert len(weekly_scores) == 2
         assert weekly_scores[0].week_start == datetime(2023, 1, 2)
         assert weekly_scores[0].week_end == datetime(2023, 1, 8)
-        assert weekly_scores[0].user_scores[0] == UserWeeklyScore(
-            user_id=1, average_score=75.0
-        )
+        assert weekly_scores[0].user_scores[0] == UserWeeklyScore(user_id=1, average_score=75.0)
         assert weekly_scores[1].week_start == datetime(2023, 1, 9)
         assert weekly_scores[1].week_end == datetime(2023, 1, 15)
-        assert weekly_scores[1].user_scores[0] == UserWeeklyScore(
-            user_id=1, average_score=85.0
-        )
+        assert weekly_scores[1].user_scores[0] == UserWeeklyScore(user_id=1, average_score=85.0)
 
 
 @pytest.mark.asyncio
@@ -145,9 +133,7 @@ async def test_is_user_member_of_company(mock_db_session):
 
     with patch.object(mock_db_session, "execute", return_value=mock_result):
         analytics_service = AnalyticsService()
-        is_member = await analytics_service.is_user_member_of_company(
-            db=mock_db_session, user_id=1, company_id=1
-        )
+        is_member = await analytics_service.is_user_member_of_company(db=mock_db_session, user_id=1, company_id=1)
 
         assert is_member is True
 
@@ -169,14 +155,10 @@ async def test_get_user_quiz_scores_over_time(mock_db_session):
         assert len(weekly_scores) == 2
         assert weekly_scores[0].week_start == datetime(2023, 1, 2).date()
         assert weekly_scores[0].week_end == datetime(2023, 1, 8).date()
-        assert weekly_scores[0].quiz_scores[0] == QuizWeeklyScore(
-            quiz_id=1, average_score=75.0
-        )
+        assert weekly_scores[0].quiz_scores[0] == QuizWeeklyScore(quiz_id=1, average_score=75.0)
         assert weekly_scores[1].week_start == datetime(2023, 1, 9).date()
         assert weekly_scores[1].week_end == datetime(2023, 1, 15).date()
-        assert weekly_scores[1].quiz_scores[0] == QuizWeeklyScore(
-            quiz_id=1, average_score=85.0
-        )
+        assert weekly_scores[1].quiz_scores[0] == QuizWeeklyScore(quiz_id=1, average_score=85.0)
 
 
 @pytest.mark.asyncio
@@ -188,9 +170,7 @@ async def test_get_company_quiz_completions(mock_db_session):
 
     with patch.object(mock_db_session, "execute", return_value=mock_result):
         analytics_service = AnalyticsService()
-        completions = await analytics_service.get_company_quiz_completions(
-            db=mock_db_session, company_id=1
-        )
+        completions = await analytics_service.get_company_quiz_completions(db=mock_db_session, company_id=1)
 
         assert len(completions) == 1
         assert completions[0] == MemberQuizCompletion(
