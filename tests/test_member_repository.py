@@ -46,9 +46,7 @@ async def test_get_member(mock_db_session, member_data):
 async def test_user_exists(mock_db_session):
     user = User(id=1, email="test@example.com")
 
-    with patch.object(
-        User, "get_by_id", new_callable=AsyncMock, return_value=user
-    ) as mock_get_by_id:
+    with patch.object(User, "get_by_id", new_callable=AsyncMock, return_value=user) as mock_get_by_id:
         member_repo = MemberRepository()
         result = await member_repo.user_exists(db=mock_db_session, user_id=1)
         assert result is True
@@ -159,9 +157,7 @@ async def test_get_all_members(mock_db_session, member_data):
     mock_db_session.execute.return_value = mock_result
 
     member_repo = MemberRepository()
-    result = await member_repo.get_all_members(
-        db=mock_db_session, company_id=member_data.company_id
-    )
+    result = await member_repo.get_all_members(db=mock_db_session, company_id=member_data.company_id)
     assert result == members
     mock_db_session.execute.assert_awaited_once()
     mock_result.scalars.assert_called_once()
@@ -180,9 +176,7 @@ async def test_get_all_requests_or_invites_by_user(mock_db_session, member_data)
     mock_db_session.execute.return_value = mock_result
 
     member_repo = MemberRepository()
-    result = await member_repo.get_all_requests_or_invites_by_user(
-        db=mock_db_session, user_id=member_data.user_id
-    )
+    result = await member_repo.get_all_requests_or_invites_by_user(db=mock_db_session, user_id=member_data.user_id)
     assert result == members
     mock_db_session.execute.assert_awaited_once()
     mock_result.scalars.assert_called_once()
@@ -212,9 +206,7 @@ async def test_get_all_invited_members(mock_db_session, member_data):
 async def test_company_exists(mock_db_session):
     company = Company(id=1, name="Test Company", owner_id=1)
 
-    with patch.object(
-        Company, "get_by_id", new_callable=AsyncMock, return_value=company
-    ) as mock_get_by_id:
+    with patch.object(Company, "get_by_id", new_callable=AsyncMock, return_value=company) as mock_get_by_id:
         member_repo = MemberRepository()
         result = await member_repo.company_exists(db=mock_db_session, company_id=1)
         assert result is True
@@ -315,9 +307,7 @@ async def test_get_memberships_all_my_companies(mock_db_session, member_data):
     mock_db_session.execute.return_value = mock_result
 
     member_repo = MemberRepository()
-    result = await member_repo.get_memberships_all_my_companies(
-        db=mock_db_session, user_id=member_data.user_id
-    )
+    result = await member_repo.get_memberships_all_my_companies(db=mock_db_session, user_id=member_data.user_id)
     assert result == members
     mock_db_session.execute.assert_awaited_once()
     mock_result.scalars.assert_called_once()

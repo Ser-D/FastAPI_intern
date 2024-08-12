@@ -36,16 +36,8 @@ async def check_quiz_completions():
                     if not user:
                         continue
 
-                    last_completion_time = (
-                        await quiz_repository.get_last_completion_time(
-                            db, user.id, quiz.id
-                        )
-                    )
-                    if not last_completion_time or (
-                        datetime.utcnow() - last_completion_time > timedelta(hours=24)
-                    ):
-                        await notification_repo.create_incomplete_quiz_notification(
-                            db, user.id, quiz.id
-                        )
+                    last_completion_time = await quiz_repository.get_last_completion_time(db, user.id, quiz.id)
+                    if not last_completion_time or (datetime.utcnow() - last_completion_time > timedelta(hours=24)):
+                        await notification_repo.create_incomplete_quiz_notification(db, user.id, quiz.id)
         finally:
             await db.close()

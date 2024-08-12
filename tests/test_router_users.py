@@ -16,9 +16,7 @@ async def test_get_users():
         User(id=2, email="user2@example.com"),
     ]
 
-    with patch(
-        "app.models.users.User.get_all", new_callable=AsyncMock, return_value=users
-    ):
+    with patch("app.models.users.User.get_all", new_callable=AsyncMock, return_value=users):
         response = client.get("/users/users")
         assert response.status_code == 200
         assert len(response.json()["items"]) == 2

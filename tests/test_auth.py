@@ -37,9 +37,7 @@ def signup_request():
 async def test_create_user_success(mock_db_session, signup_request, user_data):
     new_user = User(**user_data)
     with patch.object(User, "create", new_callable=AsyncMock, return_value=new_user):
-        user = await auth_service.create_user(
-            mock_db_session, **signup_request.model_dump()
-        )
+        user = await auth_service.create_user(mock_db_session, **signup_request.model_dump())
         assert user.email == new_user.email
 
 
@@ -53,9 +51,7 @@ async def test_create_user_duplicate(mock_db_session, signup_request, user_data)
 
     with patch.object(User, "create", new_callable=AsyncMock, side_effect=error):
         with pytest.raises(HTTPException) as excinfo:
-            await auth_service.create_user(
-                mock_db_session, **signup_request.model_dump()
-            )
+            await auth_service.create_user(mock_db_session, **signup_request.model_dump())
 
         assert excinfo.value.status_code == 409
         assert excinfo.value.detail == "Account already exists"
@@ -69,9 +65,7 @@ def signin_request():
 @pytest.mark.asyncio
 async def test_authenticate_user_success(mock_db_session, user_data, signin_request):
     user = User(**user_data)
-    with patch.object(
-        User, "get_user_by_email", new_callable=AsyncMock, return_value=user
-    ):
+    with patch.object(User, "get_user_by_email", new_callable=AsyncMock, return_value=user):
         with patch.object(auth_service, "verify_password", return_value=True):
             authenticated_user = await auth_service.authenticate_user(
                 mock_db_session, signin_request.email, signin_request.password
@@ -81,13 +75,9 @@ async def test_authenticate_user_success(mock_db_session, user_data, signin_requ
 
 @pytest.mark.asyncio
 async def test_authenticate_user_invalid_credentials(mock_db_session, signin_request):
-    with patch.object(
-        User, "get_user_by_email", new_callable=AsyncMock, return_value=None
-    ):
+    with patch.object(User, "get_user_by_email", new_callable=AsyncMock, return_value=None):
         with pytest.raises(HTTPException) as excinfo:
-            await auth_service.authenticate_user(
-                mock_db_session, signin_request.email, signin_request.password
-            )
+            await auth_service.authenticate_user(mock_db_session, signin_request.email, signin_request.password)
         assert excinfo.value.status_code == 401
         assert excinfo.value.detail == "Invalid credentials"
 
@@ -129,9 +119,7 @@ async def test_get_current_user_success(mock_db_session, user_data):
                         new_callable=AsyncMock,
                         return_value=user,
                     ):
-                        current_user = await auth_service.get_current_user(
-                            credentials, mock_db_session
-                        )
+                        current_user = await auth_service.get_current_user(credentials, mock_db_session)
                         assert current_user.email == user.email
 
 
@@ -143,9 +131,7 @@ async def test_get_current_user_invalid_token(mock_db_session, user_data):
         auth_service,
         "check_token_auth0",
         new_callable=AsyncMock,
-        side_effect=HTTPException(
-            status_code=401, detail="Could not validate credentials"
-        ),
+        side_effect=HTTPException(status_code=401, detail="Could not validate credentials"),
     ):
         with pytest.raises(HTTPException) as excinfo:
             await auth_service.get_current_user(token, mock_db_session)
@@ -159,9 +145,7 @@ async def test_create_access_token_success():
     data = {"sub": "test@example.com"}
     token = await auth_service.create_access_token(data)
     assert token is not None
-    payload = jwt.decode(
-        token, auth_service.SECRET_KEY, algorithms=[auth_service.ALGORITHM]
-    )
+    payload = jwt.decode(token, auth_service.SECRET_KEY, algorithms=[auth_service.ALGORITHM])
     assert payload["sub"] == data["sub"]
 
 
@@ -192,13 +176,9 @@ async def test_check_token_auth0_success(mock_db_session, user_data):
     email = user_data["email"]
     user = User(**user_data)
 
-    with patch.object(
-        auth_service, "load_public_key_from_cert", return_value="public_key"
-    ):
+    with patch.object(auth_service, "load_public_key_from_cert", return_value="public_key"):
         with patch.object(jwt, "decode", return_value={"email": email}):
-            with patch.object(
-                User, "get_user_by_email", new_callable=AsyncMock, return_value=user
-            ):
+            with patch.object(User, "get_user_by_email", new_callable=AsyncMock, return_value=user):
                 result = await auth_service.check_token_auth0(token, mock_db_session)
                 assert result == email
 
@@ -207,9 +187,7 @@ async def test_check_token_auth0_success(mock_db_session, user_data):
 async def test_check_token_auth0_no_email(mock_db_session):
     token = "valid_jwt_token"
 
-    with patch.object(
-        auth_service, "load_public_key_from_cert", return_value="public_key"
-    ):
+    with patch.object(auth_service, "load_public_key_from_cert", return_value="public_key"):
         with patch.object(jwt, "decode", return_value={}):
             with pytest.raises(HTTPException) as excinfo:
                 await auth_service.check_token_auth0(token, mock_db_session)
@@ -221,9 +199,7 @@ async def test_check_token_auth0_no_email(mock_db_session):
 async def test_check_token_auth0_invalid_token(mock_db_session):
     token = "invalid_jwt_token"
 
-    with patch.object(
-        auth_service, "load_public_key_from_cert", return_value="public_key"
-    ):
+    with patch.object(auth_service, "load_public_key_from_cert", return_value="public_key"):
         with patch.object(jwt, "decode", side_effect=jwt.JWTError):
             with pytest.raises(HTTPException) as excinfo:
                 await auth_service.check_token_auth0(token, mock_db_session)

@@ -19,20 +19,14 @@ from app.schemas.quizzes import QuizRunResponse
 async def test_create_quiz(mock_db_session, quiz_create_data):
     question = QuestionModel(id=1, company_id=1)
 
-    with patch.object(
-        QuizRepository, "check_if_admin", new_callable=AsyncMock, return_value=None
-    ):
+    with patch.object(QuizRepository, "check_if_admin", new_callable=AsyncMock, return_value=None):
         mock_scalars = MagicMock()
         mock_scalars.all.return_value = [question]
         mock_result = MagicMock()
         mock_result.scalars.return_value = mock_scalars
 
-        with patch.object(
-            mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result
-        ):
-            with patch.object(
-                mock_db_session, "commit", new_callable=AsyncMock, return_value=None
-            ):
+        with patch.object(mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result):
+            with patch.object(mock_db_session, "commit", new_callable=AsyncMock, return_value=None):
                 with patch.object(
                     mock_db_session,
                     "refresh",
@@ -60,9 +54,7 @@ async def test_create_quiz(mock_db_session, quiz_create_data):
                             )
 
                             assert created_quiz.title == quiz_create_data.title
-                            assert (
-                                created_quiz.description == quiz_create_data.description
-                            )
+                            assert created_quiz.description == quiz_create_data.description
 
 
 @pytest.mark.asyncio
@@ -74,21 +66,15 @@ async def test_get_quizzes(mock_db_session, quiz_create_data):
         description=quiz_create_data.description,
     )
 
-    with patch.object(
-        QuizRepository, "check_if_admin", new_callable=AsyncMock, return_value=None
-    ):
+    with patch.object(QuizRepository, "check_if_admin", new_callable=AsyncMock, return_value=None):
         mock_scalars = MagicMock()
         mock_scalars.all.return_value = [quiz]
         mock_result = MagicMock()
         mock_result.scalars.return_value = mock_scalars
 
-        with patch.object(
-            mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result
-        ):
+        with patch.object(mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result):
             quiz_repo = QuizRepository()
-            quizzes = await quiz_repo.get_quizzes(
-                db=mock_db_session, company_id=1, user_id=1, skip=0, limit=10
-            )
+            quizzes = await quiz_repo.get_quizzes(db=mock_db_session, company_id=1, user_id=1, skip=0, limit=10)
 
             assert len(quizzes) == 1
             assert quizzes[0].title == quiz_create_data.title
@@ -106,9 +92,7 @@ async def test_update_quiz(mock_db_session, quiz_update_data):
     with patch.object(QuizRepository, "check_if_admin", AsyncMock(return_value=None)):
         with patch.object(mock_db_session, "get", AsyncMock(return_value=quiz)):
             with patch.object(mock_db_session, "commit", AsyncMock(return_value=None)):
-                with patch.object(
-                    mock_db_session, "refresh", AsyncMock(return_value=None)
-                ):
+                with patch.object(mock_db_session, "refresh", AsyncMock(return_value=None)):
                     quiz_repo = QuizRepository()
                     updated_quiz = await quiz_repo.update_quiz(
                         db=mock_db_session,
@@ -129,13 +113,9 @@ async def test_delete_quiz(mock_db_session):
     with patch.object(QuizRepository, "check_if_admin", AsyncMock(return_value=None)):
         with patch.object(mock_db_session, "get", AsyncMock(return_value=quiz)):
             with patch.object(mock_db_session, "commit", AsyncMock(return_value=None)):
-                with patch.object(
-                    mock_db_session, "delete", AsyncMock(return_value=None)
-                ):
+                with patch.object(mock_db_session, "delete", AsyncMock(return_value=None)):
                     quiz_repo = QuizRepository()
-                    await quiz_repo.delete_quiz(
-                        db=mock_db_session, quiz_id=1, company_id=1, user_id=1
-                    )
+                    await quiz_repo.delete_quiz(db=mock_db_session, quiz_id=1, company_id=1, user_id=1)
 
                     mock_db_session.get.assert_awaited_once_with(QuizModel, 1)
                     mock_db_session.commit.assert_awaited_once()
@@ -147,17 +127,13 @@ async def test_run_quiz(mock_db_session, quiz_run_responses):
     quiz = QuizModel(id=1, company_id=1, question_ids=[1, 2, 3])
     question = QuestionModel(id=1, company_id=1, correct_answers=[1])
 
-    with patch.object(
-        mock_db_session, "get", new_callable=AsyncMock, return_value=quiz
-    ):
+    with patch.object(mock_db_session, "get", new_callable=AsyncMock, return_value=quiz):
         mock_scalars = MagicMock()
         mock_scalars.all.return_value = [question]
         mock_result = MagicMock()
         mock_result.scalars.return_value = mock_scalars
 
-        with patch.object(
-            mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result
-        ):
+        with patch.object(mock_db_session, "execute", new_callable=AsyncMock, return_value=mock_result):
             with patch.object(
                 QuizRepository,
                 "store_quiz_responses",
@@ -199,9 +175,7 @@ async def test_get_quiz_with_questions(mock_db_session):
     mock_db_session.execute.side_effect = [mock_result_quiz, mock_result_questions]
 
     quiz_repo = QuizRepository()
-    result_quiz, result_questions = await quiz_repo.get_quiz_with_questions(
-        mock_db_session, quiz_id
-    )
+    result_quiz, result_questions = await quiz_repo.get_quiz_with_questions(mock_db_session, quiz_id)
 
     assert result_quiz == quiz
     assert result_questions == questions
@@ -283,9 +257,7 @@ async def test_store_quiz_responses(mock_db_session):
                 }
             },
         ]
-        mock_redis_setex.assert_awaited_once_with(
-            key, timedelta(hours=48), json.dumps(expected_data)
-        )
+        mock_redis_setex.assert_awaited_once_with(key, timedelta(hours=48), json.dumps(expected_data))
 
 
 @pytest.mark.asyncio

@@ -78,10 +78,7 @@ def quiz_update_data(faker):
 
 @pytest.fixture
 def quiz_run_responses(faker):
-    return [
-        QuizRunResponse(selected_answers=[faker.random_int(min=1, max=10)])
-        for _ in range(3)
-    ]
+    return [QuizRunResponse(selected_answers=[faker.random_int(min=1, max=10)]) for _ in range(3)]
 
 
 @pytest.fixture

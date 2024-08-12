@@ -16,9 +16,7 @@ def test_health_check():
 
 @pytest.mark.asyncio
 async def test_healthchecker():
-    with patch(
-        "app.routers.checkers.get_database", new_callable=AsyncMock
-    ) as mock_get_database:
+    with patch("app.routers.checkers.get_database", new_callable=AsyncMock) as mock_get_database:
         mock_session = AsyncMock()
         mock_session.execute.return_value.fetchone.return_value = (1,)
         mock_get_database.return_value = mock_session

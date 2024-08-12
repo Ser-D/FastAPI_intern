@@ -2,17 +2,20 @@ import json
 from datetime import datetime, timedelta
 from typing import List
 
-from fastapi import HTTPException
+import pandas as pd
+from fastapi import HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.core.config import logger
 from app.db.redis import redis_client
+from app.models import Quiz
 from app.models.members import Member
 from app.models.question import Question as QuestionModel
 from app.models.quiz import Quiz as QuizModel
 from app.models.quizresult import QuizResult as QuizResultModel
 from app.repository.notifications import notification_repo
+from app.repository.questions import question_repository
 from app.repository.quizresult import repo_quizresult
 from app.schemas.quizzes import QuizCreate, QuizResponseRedis, QuizResult, QuizRunResponse, QuizUpdate
 
@@ -244,6 +247,48 @@ class QuizRepository:
         )
         last_completion = result.scalars().first()
         return last_completion
+
+    async def get_quiz_by_id_and_company(self, db: AsyncSession, quiz_id: int, company_id: int) -> Quiz:
+        result = await db.execute(select(Quiz).filter_by(id=quiz_id, company_id=company_id))
+        quiz = result.scalars().first()
+        if not quiz:
+            raise HTTPException(status_code=404, detail="Quiz not found or does not belong to the company.")
+        return quiz
+
+    async def create_quiz_from_excel(
+        self, db: AsyncSession, file: UploadFile, company_id: int, question_repo: question_repository
+    ) -> None:
+        df = self._parse_excel(file)
+        question_ids = await question_repo.create_questions_from_excel(db, df, company_id)
+
+        quiz_data = Quiz(
+            title=df.get("title")[0],
+            description=df.get("description")[0],
+            company_id=company_id,
+            question_ids=question_ids,
+        )
+
+        db.add(quiz_data)
+        await db.commit()
+        await db.refresh(quiz_data)
+
+    async def update_quiz_from_excel(self, db: AsyncSession, file: UploadFile, company_id: int) -> None:
+        df = self._parse_excel(file)
+        quiz_id = df.get("quiz_id")[0]
+        quiz = await self.get_quiz_by_id_and_company(db, quiz_id, company_id)
+
+        quiz.title = df.get("title")[0]
+        quiz.description = df.get("description")[0]
+
+        await db.commit()
+        await db.refresh(quiz)
+
+    def _parse_excel(self, file: UploadFile) -> pd.DataFrame:
+        try:
+            df = pd.read_excel(file.file)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Error reading Excel file.")
+        return df
 
 
 quiz_repository = QuizRepository()

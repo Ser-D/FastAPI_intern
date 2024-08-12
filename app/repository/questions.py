@@ -1,9 +1,11 @@
 from typing import List
 
+import pandas as pd
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
+from app.models import Question
 from app.models.members import Member
 from app.models.question import Question as QuestionModel
 from app.schemas.questions import QuestionCreate, QuestionUpdate
@@ -85,6 +87,22 @@ class QuestionRepository:
         await db.commit()
         await db.refresh(db_question)
         return db_question
+
+    async def create_questions_from_excel(self, db: AsyncSession, df: pd.DataFrame, company_id: int) -> list[int]:
+        question_ids = []
+        for index, row in df.iterrows():
+            question_data = QuestionCreate(
+                text=row["text"],
+                answer_options=row["answer_options"].split(","),
+                correct_answers=row["correct_answers"].split(","),
+                company_id=company_id,
+            )
+            new_question = Question(**question_data.model_dump())
+            db.add(new_question)
+            await db.commit()
+            await db.refresh(new_question)
+            question_ids.append(new_question.id)
+        return question_ids
 
 
 question_repository = QuestionRepository()

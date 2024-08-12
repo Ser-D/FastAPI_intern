@@ -53,17 +53,13 @@ async def test_create_quiz_notification(mock_db_session):
 
     with patch.object(mock_db_session, "commit", new_callable=AsyncMock) as mock_commit:
         with patch.object(mock_db_session, "add", new_callable=AsyncMock) as mock_add:
-            await notification_repo.create_quiz_notification(
-                db=mock_db_session, company_id=company_id, quiz_id=quiz_id
-            )
+            await notification_repo.create_quiz_notification(db=mock_db_session, company_id=company_id, quiz_id=quiz_id)
 
             assert mock_add.call_count == len(users)
             for i, user in enumerate(users):
                 args, _ = mock_add.call_args_list[i]
                 notification = args[0]
-                print(
-                    f"Testing user: {user.id}, notification.user_id: {notification.user_id}"
-                )  # Debug output
+                print(f"Testing user: {user.id}, notification.user_id: {notification.user_id}")  # Debug output
                 assert notification.user_id == user.id
 
 
@@ -72,20 +68,14 @@ async def test_get_user_notifications(mock_db_session):
     user_id = 1
     mock_result = MagicMock()
     mock_scalars = MagicMock()
-    mock_scalars.all.return_value = [
-        Notification(user_id=user_id, message="Test Message")
-    ]
+    mock_scalars.all.return_value = [Notification(user_id=user_id, message="Test Message")]
 
     mock_result.scalars.return_value = mock_scalars
     mock_db_session.execute.return_value = mock_result
 
-    with patch.object(
-        mock_db_session, "execute", return_value=mock_result
-    ) as mock_execute:
+    with patch.object(mock_db_session, "execute", return_value=mock_result) as mock_execute:
         notification_repo = NotificationRepository()
-        notifications = await notification_repo.get_user_notifications(
-            mock_db_session, user_id
-        )
+        notifications = await notification_repo.get_user_notifications(mock_db_session, user_id)
 
         assert len(notifications) == 1
         assert notifications[0].user_id == user_id
@@ -94,9 +84,7 @@ async def test_get_user_notifications(mock_db_session):
 
 
 @pytest.mark.asyncio
-async def test_create_incomplete_quiz_notification(
-    mock_db_session, user_data, notification_data
-):
+async def test_create_incomplete_quiz_notification(mock_db_session, user_data, notification_data):
     with patch("app.core.config.logger.info") as mock_logger:
         notification_repo = NotificationRepository()
         await notification_repo.create_incomplete_quiz_notification(
@@ -112,12 +100,8 @@ async def test_create_incomplete_quiz_notification(
         assert isinstance(called_notification.created_at, datetime)
 
         mock_db_session.commit.assert_awaited_once()
-        mock_logger.assert_any_call(
-            f"Creating notification for user {user_data['id']} and quiz 1"
-        )
-        mock_logger.assert_any_call(
-            f"Notification created for user {user_data['id']} for quiz 1"
-        )
+        mock_logger.assert_any_call(f"Creating notification for user {user_data['id']} and quiz 1")
+        mock_logger.assert_any_call(f"Notification created for user {user_data['id']} for quiz 1")
 
 
 @pytest.mark.asyncio
@@ -130,9 +114,7 @@ async def test_get_user_notifications(mock_db_session, notification_data):
     mock_result = MagicMock()
     mock_result.scalars.return_value = mock_scalars
 
-    with patch.object(
-        mock_db_session, "execute", return_value=mock_result
-    ) as mock_execute_call:
+    with patch.object(mock_db_session, "execute", return_value=mock_result) as mock_execute_call:
         notification_repo = NotificationRepository()
         fetched_notifications = await notification_repo.get_user_notifications(
             db=mock_db_session, user_id=notification_data["user_id"]
@@ -142,11 +124,7 @@ async def test_get_user_notifications(mock_db_session, notification_data):
 
         mock_execute_call.assert_awaited_once()
         args, kwargs = mock_execute_call.await_args
-        assert str(args[0]) == str(
-            select(Notification).filter(
-                Notification.user_id == notification_data["user_id"]
-            )
-        )
+        assert str(args[0]) == str(select(Notification).filter(Notification.user_id == notification_data["user_id"]))
 
 
 @pytest.mark.asyncio

@@ -14,9 +14,7 @@ from app.services.scheduler import check_quiz_completions
 @patch("app.services.scheduler.fetch_quizzes")
 @patch("app.services.scheduler.fetch_members")
 @patch("app.services.scheduler.fetch_user")
-@patch(
-    "app.repository.notifications.notification_repo.create_incomplete_quiz_notification"
-)
+@patch("app.repository.notifications.notification_repo.create_incomplete_quiz_notification")
 @patch("app.repository.quizzes.quiz_repository.get_last_completion_time")
 async def test_check_quiz_completions(
     mock_get_last_completion_time,
