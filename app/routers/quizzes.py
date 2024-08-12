@@ -1,13 +1,14 @@
 from typing import List
 
 from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_database
 from app.models.users import User
 from app.repository.questions import question_repository
 from app.repository.quizzes import quiz_repository
-from app.schemas.quizzes import QuestionBase, Quiz, QuizCreate, QuizRunResponse, QuizWithQuestions
+from app.schemas.quizzes import QuestionBase, Quiz, QuizCreate, QuizImportResponse, QuizRunResponse, QuizWithQuestions
 from app.services.auth import auth_service
 
 router = APIRouter(prefix="/quizzes/{company_id}/quizzes", tags=["quizzes"])
@@ -101,7 +102,7 @@ async def run_quiz_endpoint(
     return result
 
 
-@router.post("/import-quiz/", status_code=201)
+@router.post("/import-quiz/", response_model=QuizImportResponse)
 async def import_quiz(
     company_id: int,
     update_existing: bool,
@@ -113,7 +114,11 @@ async def import_quiz(
 
     if update_existing:
         await quiz_repository.update_quiz_from_excel(db, file, company_id)
+        status_code = 200
     else:
         await quiz_repository.create_quiz_from_excel(db, file, company_id, question_repository)
+        status_code = 201
 
-    return {"detail": "Quiz imported successfully."}
+    response_content = QuizImportResponse(detail="Quiz imported successfully.", status_code=status_code)
+
+    return JSONResponse(content=response_content.dict(), status_code=status_code)

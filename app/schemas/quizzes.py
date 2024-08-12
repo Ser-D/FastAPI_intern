@@ -52,3 +52,8 @@ class QuizResult(BaseModel):
 class QuizResponseRedis(BaseModel):
     selected_answers: List[int]
     is_correct: bool
+
+
+class QuizImportResponse(BaseModel):
+    detail: str
+    status_code: int
